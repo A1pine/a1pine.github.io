@@ -1,22 +1,18 @@
-name: Build GH Pages
+name: Zola on GitHub Pages
 
-on:
-  workflow_dispatch:
+on: 
+ push:
+  branches:
+   - main
 
 jobs:
-  build-gh-pages:
-    permissions:
-      contents: write    
-    name: Build and Deploy
-    runs-on: ubuntu-24.04
-    if: github.ref == 'refs/heads/main'
+  build:
+    name: Publish site
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Build and Deploy
-        uses: shalzz/zola-deploy-action@v0.20.0
-        env:
-          PAGES_BRANCH: gh-pages
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout main
+      uses: actions/checkout@v4
+    - name: Build and deploy
+      uses: shalzz/zola-deploy-action@v0.21.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
