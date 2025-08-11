@@ -1,16 +1,55 @@
 # The URL the site will be built for
-base_url = "https://a1pine.github.io"
-
-# Whether to automatically compile all Sass files in the sass directory
+base_url = "https://example.com"
+title = "Xuning Tan"
+description = "Academic Portfolio"
 compile_sass = true
-
-# Whether to build a search index to be used later on by a JavaScript library
 build_search_index = true
+theme = "academic"
 
 [markdown]
-# Whether to do syntax highlighting
-# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
 highlight_code = true
+highlight_theme = "monokai"
 
 [extra]
-# Put all your custom variables here
+# Author Information
+author = "Xuning Tan"
+position = "MPhil student of SSE, CUHK(SZ)"
+bio = """I am currently an MPhil student at the School of SSE, The Chinese University of Hong Kong, Shenzhen, 
+under the supervision of Professor Junhua Zhao. From 2022 to 2025, I was working at NetEase Games. 
+Prior to that, I obtained my Bachelor of Advanced Computing (Honours) degree at the Australian National University. <br>
+My research interests include trustworthy AI, privacy-preserving machine learning, and smart grids."""
+
+# Contact Information
+office = "2001 Longxiang Boulevard, Longcheng Street"
+email = "ac@xuningtan.com"
+twitter = "xuningtan"
+profile_image = "/images/profile.jpg"
+scholar_url = "https://scholar.google.com/citations?user=gPmLhlAAAAAJ"
+github_username = "a1pine"
+
+# Institution
+institution = "Chinese University of Hong Kong, Shenzhen"
+
+# News Section
+news_date = "August, 2025"
+news = [
+    {title = "New Journey", content = "After three years working at NetEase Games, I decided to return to academia and began MPhil studies under Prof. Junhua Zhao."}
+]
+
+# Teaching Section
+# teaching = [
+#     {code = "CS106A", name = "Programming Methodologies", url = "http://web.stanford.edu/class/archive/cs/cs106a/cs106a.1246/", last_taught = "Spr 2023"},
+#     {code = "CS109", name = "Probability for Computer Scientists", url = "http://web.stanford.edu/class/archive/cs/cs109/cs109.1252/", last_taught = "Fall 2024"},
+#     {code = "CS398", name = "Computational Education", url = "http://cs398.stanford.edu/", last_taught = "Fall 2019"},
+#     {code = "CS106B", name = "Programming Abstractions", url = "http://web.stanford.edu/class/archive/cs/cs106b/cs106b.1172/", last_taught = "Fall 2016"}
+# ]
+
+# Navigation Links
+nav_links = [
+    {name = "Home", url = "/"},
+    #{name = "Publications", url = "/publications"},
+    # {name = "Teaching", url = "/teaching"},
+    # {name = "Research", url = "/research"},
+    #{name = "Blog", url = "/blog"}
+]
+cv_url = "/cv.pdf"

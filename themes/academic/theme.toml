@@ -1,0 +1,13 @@
+name = "Academic"
+description = "A clean academic portfolio theme"
+license = "MIT"
+homepage = ""
+min_version = "0.4.0"
+
+[author]
+name = "Xuning Tan"
+homepage = ""
+
+[original]
+author = "Chris Piech"
+homepage = "https://stanford.edu/~cpiech/bio/index.html"

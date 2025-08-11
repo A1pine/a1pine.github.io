@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% import "publication.html" as publication %}
+
+{% block content %}
+<div class="container-centered">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <!-- Profile Section -->
+        <div class="md:col-span-3">
+            <div class="rounded-lg overflow-hidden">
+                <img src="https://a1pine.github.io/assets/img/prof_pic-480.webp" alt="{{ config.extra.author }}" class="w-full">
+            </div>
+        </div>
+        
+        <div class="md:col-span-9">
+            <h1 class="text-4xl font-bold mb-4">{{ config.extra.author }}</h1>
+            <hr class="my-4">
+            <p class="mb-4">
+                {{ config.extra.position | safe }}
+            </p>
+            
+            <div class="space-y-2">
+                {% if config.extra.office %}
+                <p>
+                    <span class="inline-block w-6"><i class="fas fa-building"></i></span>
+                    Office: {{ config.extra.office }}
+                </p>
+                {% endif %}
+                
+                {% if config.extra.email %}
+                <p>
+                    <span class="inline-block w-6"><i class="fas fa-envelope"></i></span>
+                    Email: {{ config.extra.email | replace(from="@", to=" [at] ") }}
+                </p>
+                {% endif %}
+                
+                {% if config.extra.twitter %}
+                <p>
+                    <span class="inline-block w-6"><i class="fab fa-twitter"></i></span>
+                    Twitter: <a href="https://twitter.com/{{ config.extra.twitter }}" class="text-blue-600 hover:text-blue-800">@{{ config.extra.twitter }}</a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Bio Section -->
+        <div class="md:col-span-12">
+            <p class="italic text-gray-700">
+                {{ config.extra.bio | safe }}
+            </p>
+        </div>
+    </div>
+
+    <!-- News Section -->
+    {% if config.extra.news %}
+    <div class="mt-8">
+        <div class="bg-gray-100 p-6 rounded-lg">
+            <div class="mb-2"><strong>News</strong> ({{ config.extra.news_date }}):</div>
+            {% for item in config.extra.news %}
+            <div class="mb-2">
+                <strong class="text-gray-900">{{ item.title }}</strong>: {{ item.content | safe }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Teaching Section -->
+    {% if config.extra.teaching %}
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Teaching at {{ config.extra.institution }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {% for course in config.extra.teaching %}
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <h4 class="font-bold">{{ course.code }}</h4>
+                <p>
+                    <a href="{{ course.url }}" class="text-blue-600 hover:text-blue-800">{{ course.name }}</a>
+                </p>
+                <p class="text-sm text-gray-600 mt-2">Last: {{ course.last_taught }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- GitHub Contributions Section -->
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">GitHub Activity</h2>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm overflow-hidden">
+            <img src="https://ghchart.rshah.org/{{ config.extra.github_username }}" 
+                 class="w-full dark:hidden" alt="GitHub Contributions">
+            <img src="https://ghchart.rshah.org/409ba5/{{ config.extra.github_username }}" 
+                 class="w-full hidden dark:block" alt="GitHub Contributions">
+        </div>
+    </div>
+
+    <!-- Publications Section -->
+    <!-- Get publications section -->
+    {% set pub_section = get_section(path="publications/_index.md") %}
+    {% if pub_section and pub_section.pages %}
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Recent Publications 
+            {% if config.extra.scholar_url %}
+            <a href="{{ config.extra.scholar_url }}" class="text-gray-500 hover:text-gray-700">
+                <span class="text-xl">📚</span>
+            </a>
+            {% endif %}
+            <span class="text-sm font-normal ml-2">
+                <a href="{{ get_url(path='en/publications') }}" class="text-blue-600 hover:text-blue-800">
+                    (View All)
+                </a>
+            </span>
+        </h2>
+        
+        <div class="space-y-6">
+            <!-- Show the most recent 3 publications -->
+            {% for page in pub_section.pages | slice(end=3) %}
+            <div class="mb-6">
+                {{ publication::summary(page=page) }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleBibtex(id) {
+  const bibtexElement = document.getElementById(id);
+  if (bibtexElement.classList.contains('hidden')) {
+    bibtexElement.classList.remove('hidden');
+  } else {
+    bibtexElement.classList.add('hidden');
+  }
+}
+</script>
+{% endblock content %}

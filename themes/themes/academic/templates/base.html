@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ config.description }}">
+    <meta name="author" content="{{ config.extra.author }}">
+
+    <!-- Styles -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="{{ get_url(path='css/macpanel.css') }}" rel="stylesheet">
+    <!-- Theme Script -->
+    <script src="{{ get_url(path='js/theme.js') }}"></script>
+    <style>
+        /* Progress bar styles */
+        #progress-bar {
+            position: fixed;
+            top: 56px; /* Adjusted to match header height */
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: #3b82f6;
+            z-index: 49; /* Just below header but above other content */
+            transition: width 0.2s ease-out;
+            box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3); /* Subtle shadow for better visibility */
+        }
+
+        /* Add padding to body to account for fixed header */
+        body {
+            padding-top: 59px; /* Header height + progress bar height */
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .bg-white {
+            background-color: #ffffff;
+        }
+
+        .text-gray-600 {
+            color: #4b5563;
+        }
+
+        .text-gray-800 {
+            color: #1f2937;
+        }
+
+        .text-gray-900 {
+            color: #111827;
+        }
+
+        .bg-gray-100 {
+            background-color: #f3f4f6;
+        }
+
+        /* Dark mode styles */
+        :root {
+            color-scheme: light dark;
+        }
+        
+        .dark {
+            color-scheme: dark;
+        }
+        
+        /* Centered container styles */
+        .container-centered {
+            width: 61.8%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 1rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1536px) {
+            .container-centered {
+                width: 75%;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .container-centered {
+                width: 85%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container-centered {
+                width: 95%;
+            }
+        }
+        
+        /* Custom dark mode styles */
+        .dark body {
+            background-color: #1a1a1a;
+            color: #e5e5e5;
+        }
+        
+        .dark .bg-white {
+            background-color: #1a1a1a;
+        }
+        
+        .dark .text-gray-600 {
+            color: #a3a3a3;
+        }
+        
+        .dark .text-gray-800 {
+            color: #e5e5e5;
+        }
+        
+        .dark .text-gray-900 {
+            color: #ffffff;
+        }
+        
+        .dark .bg-gray-100 {
+            background-color: #2d2d2d;
+        }
+        
+        .dark .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Theme toggle button styles */
+        #theme-toggle {
+            cursor: pointer;
+        }
+    </style>
+    {% block extra_head %}{% endblock extra_head %}
+</head>
+
+<body class="bg-white transition-colors duration-200">
+    {% include "partials/header.html" %}
+    
+    <!-- Progress Bar -->
+    <div id="progress-bar"></div>
+    
+    <div id="fullBody" class="relative">
+        <div class="container mx-auto px-4 py-8">
+            {% block content %}{% endblock content %}
+        </div>
+    </div>
+
+    <!-- Theme toggle script -->
+    <script>
+        // Check for saved theme preference, otherwise use system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark')
+                localStorage.theme = 'light'
+            } else {
+                document.documentElement.classList.add('dark')
+                localStorage.theme = 'dark'
+            }
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock extra_scripts %}
+    
+    <!-- Publication scripts -->
+    <script>
+    function toggleBibtex(id) {
+      const bibtexElement = document.getElementById(id);
+      if (bibtexElement.classList.contains('hidden')) {
+        bibtexElement.classList.remove('hidden');
+      } else {
+        bibtexElement.classList.add('hidden');
+      }
+    }
+    </script>
+    
+    <!-- Progress bar script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBar = document.getElementById('progress-bar');
+            
+            function updateProgressBar() {
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight - windowHeight;
+                const scrolled = window.scrollY;
+                const progress = (scrolled / documentHeight) * 100;
+                progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+            }
+
+            // Update on scroll
+            window.addEventListener('scroll', updateProgressBar);
+            // Update on window resize
+            window.addEventListener('resize', updateProgressBar);
+            // Initial update
+            updateProgressBar();
+        });
+    </script>
+    
+    <!-- Footer -->
+<footer class="bg-gray-100 dark:bg-gray-900 py-4 mt-8">
+    <div class="container-centered text-center text-sm text-gray-600 dark:text-gray-400">
+        &copy; Copyright 2024 {{ config.extra.author }}. 
+        Powered by <a href="https://www.getzola.org/" class="hover:text-gray-900 dark:hover:text-gray-200">Zola</a> with  
+        <a href="https://www.rust-lang.org/" class="hover:text-gray-900 dark:hover:text-gray-200">Rust</a>. 
+        Hosted by <a href="https://pages.github.com" class="hover:text-gray-900 dark:hover:text-gray-200">GitHub Pages</a>. 
+        <!-- Photos from <a href="https://unsplash.com" class="hover:text-gray-900 dark:hover:text-gray-200">Unsplash</a>. -->
+    </div>
+</footer>
+</body>
+</html>

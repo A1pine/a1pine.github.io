@@ -1,0 +1,3 @@
+[submodule "themes/academic-zola"]
+	path = themes/academic-zola
+	url = https://github.com/A1pine/academic-zola.git
