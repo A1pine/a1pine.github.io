@@ -1,0 +1,16 @@
+{
+  "name": "arcademic-rust-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "test:visual": "playwright test --project=visual-chromium tests/e2e/visual.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "axe-core": "4.10.3",
+    "pixelmatch": "7.1.0",
+    "pngjs": "7.0.0"
+  }
+}
