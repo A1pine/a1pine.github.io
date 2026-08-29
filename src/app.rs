@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
 
+#[cfg(target_arch = "wasm32")]
+use crate::components::initialize_theme;
+use crate::components::{Hero, InteractiveBackground, Navbar};
 use crate::config::{SiteConfig, site_config};
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -50,69 +53,59 @@ fn Home() -> Element {
 fn SiteShell(config: &'static SiteConfig) -> Element {
     let build_year = env!("ARCADEMIC_BUILD_YEAR").parse::<i32>().unwrap_or(2026);
     let footer_text = config.footer_text(build_year);
+    #[allow(unused_mut)]
     let mut theme = use_signal(|| config.site.default_theme);
+
+    #[cfg(target_arch = "wasm32")]
+    use_effect(move || {
+        let Some(window) = web_sys::window() else {
+            return;
+        };
+        let stored = window
+            .local_storage()
+            .ok()
+            .flatten()
+            .and_then(|storage| storage.get_item(&config.site.theme_storage_key).ok())
+            .flatten();
+        let prefers_dark = window
+            .match_media("(prefers-color-scheme: dark)")
+            .ok()
+            .flatten()
+            .is_some_and(|query| query.matches());
+        theme.set(initialize_theme(
+            config.site.default_theme,
+            stored.as_deref(),
+            prefers_dark,
+        ));
+    });
+
     let theme_name = theme().as_str();
+    let design_style = format!(
+        "--primary: {}; --primary-dark: {}; --secondary: {}; --light-bg: {}; \
+         --dark-bg: {}; --light-text: {}; --dark-text: {}; --light-card: {}; \
+         --dark-card: {}; --theme-duration: {}ms; --image-duration: {}ms; \
+         --hover-lift: {}px;",
+        config.design.primary,
+        config.design.primary_dark,
+        config.design.secondary,
+        config.design.light_background,
+        config.design.dark_background,
+        config.design.light_text,
+        config.design.dark_text,
+        config.design.light_card,
+        config.design.dark_card,
+        config.animation.theme_transition_ms,
+        config.animation.image_transition_ms,
+        config.animation.hover_lift_px,
+    );
 
     rsx! {
-        div { class: "phase-one-shell", "data-theme": theme_name,
-            header {
-                nav { aria_label: config.navbar.mobile_menu_open_label.clone(),
-                    a { href: config.navbar.brand_url.clone(), {config.navbar.brand.clone()} }
-                    for link in &config.navbar.links {
-                        a { href: link.href.clone(), {link.name.clone()} }
-                    }
-                    button {
-                        r#type: "button",
-                        aria_label: config.navbar.theme_toggle_label.clone(),
-                        onclick: move |_| theme.set(theme().toggled()),
-                        {config.navbar.theme_toggle_label.clone()}
-                    }
-                    if config.navbar.show_cv {
-                        a { href: config.navbar.cv_url.clone(), {config.navbar.cv_label.clone()} }
-                    }
-                }
-            }
+        div { class: "app-root", "data-theme": theme_name, style: design_style,
+            InteractiveBackground { config: &config.background }
+            Navbar { config: &config.navbar, theme }
 
-            main {
-                section { id: config.hero.anchor.clone(),
-                    img {
-                        src: config.hero.image_url.clone(),
-                        alt: config.hero.image_alt.clone(),
-                        width: "576",
-                        height: "576",
-                    }
-                    div { id: config.hero.about_anchor.clone(),
-                        h1 {
-                            {config.hero.first_name.clone()}
-                            " "
-                            {config.hero.last_name.clone()}
-                        }
-                        p { {config.hero.role.clone()} }
-                        p { {config.hero.location.clone()} }
-                        p { {config.hero.company.clone()} }
-                        p { {config.hero.bio.clone()} }
-                        h2 { {config.hero.interests_title.clone()} }
-                        ul {
-                            for interest in &config.hero.interests {
-                                li { {interest.name.clone()} }
-                            }
-                        }
-                        ul {
-                            for social in &config.hero.social_links {
-                                li {
-                                    a {
-                                        href: social.url.clone(),
-                                        aria_label: format!(
-                                            "{} link: {}",
-                                            social.platform, social.username
-                                        ),
-                                        {social.platform.clone()}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            main { class: "site-main",
+                Hero { config: &config.hero }
 
                 section { id: config.news.anchor.clone(),
                     h2 { {config.news.heading.clone()} }
@@ -229,10 +222,13 @@ fn SiteShell(config: &'static SiteConfig) -> Element {
                 }
             }
 
-            footer { p { {footer_text} } }
+            footer { class: "site-footer", p { {footer_text} } }
             button {
+                class: "scroll-top-placeholder",
                 r#type: "button",
                 title: config.scroll_to_top.title.clone(),
+                aria_hidden: "true",
+                tabindex: "-1",
                 {config.scroll_to_top.title.clone()}
             }
         }
