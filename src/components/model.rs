@@ -88,6 +88,50 @@ pub fn normalize_counts(counts: &[u16]) -> Vec<f64> {
         .collect()
 }
 
+pub fn activity_level(
+    week: u32,
+    day: u32,
+    week_multiplier: u32,
+    day_multiplier: u32,
+    cross_multiplier: u32,
+    offset: u32,
+    thresholds: [u8; 4],
+) -> u8 {
+    let seed =
+        (week * week_multiplier + day * day_multiplier + week * day * cross_multiplier + offset)
+            % 100;
+    let level = thresholds
+        .iter()
+        .filter(|threshold| seed > u32::from(**threshold))
+        .count();
+    u8::try_from(level).unwrap_or(4)
+}
+
+pub fn is_external_link(url: &str) -> bool {
+    url.starts_with("https://") || url.starts_with("http://")
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PublicationActionKind {
+    Disabled,
+    Internal,
+    External,
+}
+
+pub fn publication_action_kind(url: &str) -> PublicationActionKind {
+    if url.is_empty() {
+        PublicationActionKind::Disabled
+    } else if is_external_link(url) {
+        PublicationActionKind::External
+    } else {
+        PublicationActionKind::Internal
+    }
+}
+
+pub fn should_show_scroll_to_top(scroll_y: f64, threshold: u32) -> bool {
+    scroll_y > f64::from(threshold)
+}
+
 #[cfg(target_arch = "wasm32")]
 pub fn persist_theme(storage_key: &str, theme: ThemeChoice) {
     if let Some(window) = web_sys::window()
@@ -195,5 +239,53 @@ mod tests {
         assert!((normalized[0] - 0.25).abs() < f64::EPSILON);
         assert!((normalized[1] - 0.5).abs() < f64::EPSILON);
         assert!((normalized[2] - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn activity_level_matches_source_golden_cases() {
+        let thresholds = [20, 40, 60, 80];
+        assert_eq!(activity_level(0, 0, 17, 31, 7, 13, thresholds), 0);
+        assert_eq!(activity_level(1, 0, 17, 31, 7, 13, thresholds), 1);
+        assert_eq!(activity_level(2, 0, 17, 31, 7, 13, thresholds), 2);
+        assert_eq!(activity_level(3, 0, 17, 31, 7, 13, thresholds), 3);
+        assert_eq!(activity_level(4, 0, 17, 31, 7, 13, thresholds), 4);
+    }
+
+    #[test]
+    fn activity_grid_has_expected_size_and_level_range() {
+        let levels = (0..52)
+            .flat_map(|week| {
+                (0..7).map(move |day| activity_level(week, day, 17, 31, 7, 13, [20, 40, 60, 80]))
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(levels.len(), 364);
+        assert!(levels.iter().all(|level| *level <= 4));
+    }
+
+    #[test]
+    fn link_classification_distinguishes_external_targets() {
+        assert!(is_external_link("https://example.com/paper.pdf"));
+        assert!(is_external_link("http://localhost/code"));
+        assert!(!is_external_link("/papers/local.pdf"));
+        assert!(!is_external_link("#publication"));
+    }
+
+    #[test]
+    fn publication_actions_cover_disabled_internal_and_external_states() {
+        assert_eq!(publication_action_kind(""), PublicationActionKind::Disabled);
+        assert_eq!(
+            publication_action_kind("/papers/local.pdf"),
+            PublicationActionKind::Internal
+        );
+        assert_eq!(
+            publication_action_kind("https://example.com/code"),
+            PublicationActionKind::External
+        );
+    }
+
+    #[test]
+    fn scroll_to_top_threshold_is_strict() {
+        assert!(!should_show_scroll_to_top(300.0, 300));
+        assert!(should_show_scroll_to_top(300.1, 300));
     }
 }

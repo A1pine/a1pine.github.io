@@ -8,11 +8,16 @@ use crate::components::persist_theme;
 use crate::config::{NavbarConfig, ThemeChoice};
 
 #[component]
-pub fn Navbar(config: &'static NavbarConfig, mut theme: Signal<ThemeChoice>) -> Element {
+pub fn Navbar(
+    config: &'static NavbarConfig,
+    mut theme: Signal<ThemeChoice>,
+    scroll_y: Signal<f64>,
+) -> Element {
     let mut mobile_open = use_signal(|| false);
 
     #[cfg(target_arch = "wasm32")]
-    let _scroll_tracker = use_hook(|| std::rc::Rc::new(web_trackers::ScrollTracker::install()));
+    let _scroll_tracker =
+        use_hook(move || std::rc::Rc::new(web_trackers::ScrollTracker::install(scroll_y)));
 
     let is_dark = theme() == ThemeChoice::Dark;
     let toggle_theme = move |_| {
@@ -115,6 +120,7 @@ mod web_trackers {
     use std::cell::Cell;
     use std::rc::Rc;
 
+    use dioxus::prelude::WritableExt;
     use wasm_bindgen::{JsCast, closure::Closure};
     use web_sys::{AddEventListenerOptions, Event, HtmlElement};
 
@@ -128,7 +134,7 @@ mod web_trackers {
     }
 
     impl ScrollTracker {
-        pub fn install() -> Option<Self> {
+        pub fn install(mut scroll_y: dioxus::prelude::Signal<f64>) -> Option<Self> {
             let window = web_sys::window()?;
             let root = window
                 .document()?
@@ -137,14 +143,14 @@ mod web_trackers {
                 .ok()?;
             let frame = Rc::new(Cell::new(0));
 
-            apply_scroll_progress(&window, &root);
+            scroll_y.set(apply_scroll_progress(&window, &root));
 
             let callback_window = window.clone();
             let callback_root = root;
             let callback_frame = Rc::clone(&frame);
             let animation_callback = Closure::wrap(Box::new(move |_timestamp: f64| {
                 callback_frame.set(0);
-                apply_scroll_progress(&callback_window, &callback_root);
+                scroll_y.set(apply_scroll_progress(&callback_window, &callback_root));
             }) as Box<dyn FnMut(f64)>);
             let animation_function = animation_callback
                 .as_ref()
@@ -199,7 +205,7 @@ mod web_trackers {
         }
     }
 
-    fn apply_scroll_progress(window: &web_sys::Window, root: &HtmlElement) {
+    fn apply_scroll_progress(window: &web_sys::Window, root: &HtmlElement) -> f64 {
         let viewport = window
             .inner_height()
             .ok()
@@ -211,5 +217,6 @@ mod web_trackers {
         let _ = root
             .style()
             .set_property("--scroll-progress", &progress.to_string());
+        scroll_y
     }
 }

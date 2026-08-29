@@ -32,6 +32,8 @@ web-sys = { version = "0.3", features = [
   "MediaQueryList",
   "NodeList",
   "PointerEvent",
+  "ScrollBehavior",
+  "ScrollToOptions",
   "Storage",
   "Window",
 ] }

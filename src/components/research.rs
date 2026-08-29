@@ -1,6 +1,10 @@
 use dioxus::prelude::*;
+use dioxus_free_icons::{Icon, icons::ld_icons::LdArrowUpRight};
 
-use crate::components::model::{image_srcset, normalize_counts, unsplash_with_width};
+use crate::components::model::{
+    PublicationActionKind, image_srcset, normalize_counts, publication_action_kind,
+    unsplash_with_width,
+};
 use crate::components::reveal::use_reveal_observer;
 use crate::config::PublicationsConfig;
 
@@ -87,12 +91,39 @@ pub fn Research(config: &'static PublicationsConfig) -> Element {
                                 }
                             }
                             div { class: "publication-body",
-                                p { class: "publication-venue", "{publication.venue} • {publication.year}" }
+                                div { class: "publication-topline",
+                                    p { class: "publication-venue", "{publication.venue} • {publication.year}" }
+                                    span { class: "publication-arrow", aria_hidden: "true",
+                                        Icon { icon: LdArrowUpRight, width: 18, height: 18 }
+                                    }
+                                }
                                 h3 { {publication.title.clone()} }
-                                p { class: "publication-authors", {publication.authors.join(", ")} }
+                                p { class: "publication-authors",
+                                    for (author_index, author) in publication.authors.iter().enumerate() {
+                                        span {
+                                            class: if author == &config.highlight_author { "highlight-author" } else { "" },
+                                            {author.clone()}
+                                            if author_index + 1 < publication.authors.len() { ", " }
+                                        }
+                                    }
+                                }
                                 p { class: "publication-description", {publication.description.clone()} }
-                                div { class: "publication-tags",
-                                    for tag in &publication.tags { span { "#{tag}" } }
+                                div { class: "publication-footer",
+                                    div { class: "publication-tags",
+                                        for tag in &publication.tags { span { "#{tag}" } }
+                                    }
+                                    div { class: "publication-actions",
+                                        PublicationAction {
+                                            label: config.pdf_label.clone(),
+                                            url: publication.pdf_url.clone(),
+                                            primary: false,
+                                        }
+                                        PublicationAction {
+                                            label: config.code_label.clone(),
+                                            url: publication.code_url.clone(),
+                                            primary: true,
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -100,6 +131,32 @@ pub fn Research(config: &'static PublicationsConfig) -> Element {
                 }
             }
         }
+    }
+}
+
+#[component]
+fn PublicationAction(label: String, url: String, primary: bool) -> Element {
+    let class = if primary {
+        "publication-action primary"
+    } else {
+        "publication-action secondary"
+    };
+    match publication_action_kind(&url) {
+        PublicationActionKind::Disabled => rsx! {
+            button { class, r#type: "button", disabled: true, {label} }
+        },
+        PublicationActionKind::Internal => rsx! {
+            a { class, href: url, {label} }
+        },
+        PublicationActionKind::External => rsx! {
+            a {
+                class,
+                href: url,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                {label}
+            }
+        },
     }
 }
 

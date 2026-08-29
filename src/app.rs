@@ -2,7 +2,9 @@ use dioxus::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
 use crate::components::initialize_theme;
-use crate::components::{Hero, InteractiveBackground, Navbar, News, Research};
+use crate::components::{
+    Activity, Footer, Hero, InteractiveBackground, Navbar, News, Research, ScrollToTop, Teaching,
+};
 use crate::config::{SiteConfig, site_config};
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -55,6 +57,7 @@ fn SiteShell(config: &'static SiteConfig) -> Element {
     let footer_text = config.footer_text(build_year);
     #[allow(unused_mut)]
     let mut theme = use_signal(|| config.site.default_theme);
+    let scroll_y = use_signal(|| 0.0_f64);
 
     #[cfg(target_arch = "wasm32")]
     use_effect(move || {
@@ -102,55 +105,18 @@ fn SiteShell(config: &'static SiteConfig) -> Element {
     rsx! {
         div { class: "app-root", "data-theme": theme_name, style: design_style,
             InteractiveBackground { config: &config.background }
-            Navbar { config: &config.navbar, theme }
+            Navbar { config: &config.navbar, theme, scroll_y }
 
             main { class: "site-main",
                 Hero { config: &config.hero }
                 News { config: &config.news }
                 Research { config: &config.publications }
-
-                section { id: config.teaching.anchor.clone(),
-                    h2 { {config.teaching.heading.clone()} }
-                    div {
-                        for course in &config.teaching.items {
-                            article {
-                                p { {course.code.clone()} }
-                                h3 { {course.title.clone()} }
-                                p {
-                                    {config.teaching.semester_prefix.clone()}
-                                    ": "
-                                    {course.semester.clone()}
-                                }
-                                p { {course.description.clone()} }
-                            }
-                        }
-                    }
-                }
-
-                section { id: config.activity.anchor.clone(),
-                    h2 { {config.activity.heading.clone()} }
-                    div { role: "img",
-                        aria_label: config.activity.heading.clone(),
-                        p { {config.activity.months.join(" ")} }
-                        p { {config.activity.day_labels.join(" ")} }
-                        p {
-                            {config.activity.less_label.clone()}
-                            " – "
-                            {config.activity.more_label.clone()}
-                        }
-                    }
-                }
+                Teaching { config: &config.teaching }
+                Activity { config: &config.activity }
             }
 
-            footer { class: "site-footer", p { {footer_text} } }
-            button {
-                class: "scroll-top-placeholder",
-                r#type: "button",
-                title: config.scroll_to_top.title.clone(),
-                aria_hidden: "true",
-                tabindex: "-1",
-                {config.scroll_to_top.title.clone()}
-            }
+            Footer { config: &config.footer, text: footer_text }
+            ScrollToTop { config: &config.scroll_to_top, scroll_y }
         }
     }
 }
