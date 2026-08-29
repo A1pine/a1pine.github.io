@@ -20,4 +20,4 @@ pub use research::Research;
 pub use scroll_to_top::ScrollToTop;
 pub use teaching::Teaching;
 
-pub use model::{initialize_theme, persist_theme};
+pub use model::{initialize_theme, persist_theme, url_origin};

@@ -52,6 +52,12 @@ pub fn image_srcset(source: &str, widths: &[u16]) -> String {
         .join(", ")
 }
 
+pub fn url_origin(source: &str) -> Option<String> {
+    let url = url::Url::parse(source).ok()?;
+    let host = url.host_str()?;
+    Some(format!("{}://{host}", url.scheme()))
+}
+
 #[cfg_attr(not(any(target_arch = "wasm32", test)), allow(dead_code))]
 pub fn scroll_progress(scroll_y: f64, max_scroll: f64) -> f64 {
     if max_scroll <= 0.0 {
@@ -203,6 +209,15 @@ mod tests {
     fn non_unsplash_sources_are_unchanged() {
         let source = "/assets/profile.jpg";
         assert_eq!(unsplash_with_width(source, 576), source);
+    }
+
+    #[test]
+    fn url_origin_keeps_only_scheme_and_host() {
+        assert_eq!(
+            url_origin("https://images.example.com/path?q=1").as_deref(),
+            Some("https://images.example.com")
+        );
+        assert_eq!(url_origin("/assets/profile.jpg"), None);
     }
 
     #[test]

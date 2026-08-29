@@ -27,7 +27,15 @@ pub fn Navbar(
     };
 
     rsx! {
-        nav { class: "navbar", aria_label: "Primary navigation",
+        nav {
+            class: "navbar",
+            aria_label: config.primary_navigation_label.clone(),
+            onkeydown: move |event| {
+                if event.key() == Key::Escape && mobile_open() {
+                    mobile_open.set(false);
+                    focus_mobile_menu_button();
+                }
+            },
             div { class: "nav-container",
                 div { class: "nav-row",
                     a { class: "brand", href: config.brand_url.clone(), {config.brand.clone()} }
@@ -76,6 +84,7 @@ pub fn Navbar(
                             }
                         }
                         button {
+                            id: "mobile-menu-button",
                             class: "menu-button",
                             r#type: "button",
                             aria_label: if mobile_open() {
@@ -114,6 +123,22 @@ pub fn Navbar(
         }
     }
 }
+
+#[cfg(target_arch = "wasm32")]
+fn focus_mobile_menu_button() {
+    use wasm_bindgen::JsCast as _;
+
+    if let Some(button) = web_sys::window()
+        .and_then(|window| window.document())
+        .and_then(|document| document.get_element_by_id("mobile-menu-button"))
+        .and_then(|element| element.dyn_into::<web_sys::HtmlElement>().ok())
+    {
+        let _ = button.focus();
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn focus_mobile_menu_button() {}
 
 #[cfg(target_arch = "wasm32")]
 mod web_trackers {

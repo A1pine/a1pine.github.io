@@ -51,23 +51,8 @@ test -s "${source_dir}/index.html"
 rm -rf -- "${output_dir}"
 mkdir -p "${output_dir}"
 cp -R "${source_dir}/." "${output_dir}/"
+cargo run --locked --quiet --bin finalize-pages -- \
+  "${output_dir}/index.html" "${base_path}"
 touch "${output_dir}/.nojekyll"
-
-for required_text in \
-  "Tony Stark" \
-  "Avengers Initiative" \
-  "Latest News" \
-  "Selected Research" \
-  "Teaching at Stark Industries" \
-  "GitHub Activity"
-do
-  grep -Fq "${required_text}" "${output_dir}/index.html"
-done
-
-if [[ -n "${base_path}" ]]; then
-  grep -Fq "href=\"/${base_path}/assets/" "${output_dir}/index.html"
-  grep -Eq "(src|href)=\"/${base_path}/(assets|wasm)/[^\"]+\.js" \
-    "${output_dir}/index.html"
-fi
 
 echo "Pages artifact: ${output_dir}"

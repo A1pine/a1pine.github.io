@@ -6,10 +6,13 @@ use crate::components::model::{
     unsplash_with_width,
 };
 use crate::components::reveal::use_reveal_observer;
-use crate::config::PublicationsConfig;
+use crate::config::{AnimationConfig, PublicationsConfig};
 
 #[component]
-pub fn Research(config: &'static PublicationsConfig) -> Element {
+pub fn Research(
+    config: &'static PublicationsConfig,
+    animation: &'static AnimationConfig,
+) -> Element {
     use_reveal_observer("#publications [data-reveal]");
     let counts = config
         .stats
@@ -22,8 +25,8 @@ pub fn Research(config: &'static PublicationsConfig) -> Element {
         section { id: config.anchor.clone(), class: "research-section content-section",
             div { class: "research-container",
                 header { class: "research-header",
-                    h2 { class: "reveal reveal-up", "data-reveal": "", {config.heading.clone()} }
-                    p { class: "reveal reveal-up", "data-reveal": "", style: "--reveal-delay: 100ms", {config.subtitle.clone()} }
+                    h2 { class: "reveal reveal-up", "data-reveal": "", style: format!("--reveal-duration: {}ms", animation.section_duration_ms), {config.heading.clone()} }
+                    p { class: "reveal reveal-up", "data-reveal": "", style: format!("--reveal-delay: 100ms; --reveal-duration: {}ms", animation.section_duration_ms), {config.subtitle.clone()} }
                 }
 
                 div { class: "research-stats",
@@ -32,15 +35,17 @@ pub fn Research(config: &'static PublicationsConfig) -> Element {
                             label: config.total_label.clone(),
                             value: config.total_value.clone(),
                             delay_ms: 0,
+                            duration_ms: animation.section_duration_ms,
                         }
                         SummaryCard {
                             label: config.citations_label.clone(),
                             value: config.citations_value.clone(),
-                            delay_ms: 150,
+                            delay_ms: animation.stats_stagger_ms as usize,
+                            duration_ms: animation.section_duration_ms,
                         }
                     }
 
-                    div { class: "glass-card output-card reveal reveal-card", "data-reveal": "",
+                    div { class: "glass-card output-card reveal reveal-card", "data-reveal": "", style: format!("--reveal-duration: {}ms", animation.section_duration_ms),
                         div { class: "output-card-header",
                             h3 {
                                 span { class: "stat-dot", aria_hidden: "true" }
@@ -48,7 +53,10 @@ pub fn Research(config: &'static PublicationsConfig) -> Element {
                             }
                             span { class: "output-range", {config.output_range.clone()} }
                         }
-                        div { class: "bar-chart",
+                        div {
+                            class: "bar-chart",
+                            tabindex: "0",
+                            aria_label: config.output_heading.clone(),
                             for (index, stat) in config.stats.iter().enumerate() {
                                 div { class: "bar-column",
                                     div { class: "bar-tooltip",
@@ -61,7 +69,7 @@ pub fn Research(config: &'static PublicationsConfig) -> Element {
                                             class: "bar-fill",
                                             style: format!(
                                                 "--bar-scale: {}; --bar-delay: {}ms",
-                                                scales[index], index * 100
+                                                scales[index], index * animation.bar_stagger_ms as usize
                                             ),
                                         }
                                     }
@@ -77,7 +85,11 @@ pub fn Research(config: &'static PublicationsConfig) -> Element {
                         article {
                             class: "glass-card publication-card reveal reveal-card",
                             "data-reveal": "",
-                            style: format!("--reveal-delay: {}ms", index * 250),
+                            style: format!(
+                                "--reveal-delay: {}ms; --reveal-duration: {}ms",
+                                index * animation.item_stagger_ms as usize,
+                                animation.news_item_duration_ms,
+                            ),
                             div { class: "publication-image",
                                 img {
                                     src: unsplash_with_width(&publication.image_url, 576),
@@ -161,12 +173,12 @@ fn PublicationAction(label: String, url: String, primary: bool) -> Element {
 }
 
 #[component]
-fn SummaryCard(label: String, value: String, delay_ms: usize) -> Element {
+fn SummaryCard(label: String, value: String, delay_ms: usize, duration_ms: u32) -> Element {
     rsx! {
         div {
             class: "glass-card summary-card reveal reveal-card",
             "data-reveal": "",
-            style: format!("--reveal-delay: {delay_ms}ms"),
+            style: format!("--reveal-delay: {delay_ms}ms; --reveal-duration: {duration_ms}ms"),
             div { class: "summary-label",
                 span { class: "stat-dot", aria_hidden: "true" }
                 span { {label} }

@@ -1,0 +1,33 @@
+[site]
+title = "Ada Lovelace Computational Archive"
+description = "A configurable archive for analytical engines and mathematical notes."
+
+[navbar]
+brand = "Ada Lovelace"
+
+[hero]
+first_name = "Ada"
+last_name = "Lovelace"
+role = "Mathematician • Writer • Computing Pioneer"
+location = "London, United Kingdom"
+company = "Analytical Engine Archive"
+bio = "I document methods for symbolic computation and the future uses of analytical engines."
+image_alt = "Portrait of Ada Lovelace"
+interests = ["Analytical Engines", "Algorithms", "Mathematical Logic", "Music", "Poetry"]
+
+[news]
+heading = "Archive Notes"
+
+[publications]
+heading = "Selected Notes"
+
+[teaching]
+heading = "Public Lectures"
+
+[activity]
+heading = "Archive Activity"
+
+[footer]
+owner = "Ada Lovelace Archive"
+powered_by = "Analytical Engine"
+hosted_by = "Archive Press"

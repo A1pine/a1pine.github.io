@@ -42,6 +42,10 @@ pub struct SiteMetaConfig {
     pub canonical_url: String,
     pub favicon_url: String,
     pub social_image_url: String,
+    pub social_image_alt: String,
+    pub social_card: String,
+    pub robots: String,
+    pub skip_to_content_label: String,
     pub default_theme: ThemeChoice,
     pub theme_storage_key: String,
     pub base_path: String,
@@ -76,6 +80,7 @@ impl ThemeChoice {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct NavbarConfig {
+    pub primary_navigation_label: String,
     pub brand: String,
     pub brand_url: String,
     pub cv_label: String,
@@ -306,10 +311,15 @@ pub struct AnimationConfig {
     pub respect_reduced_motion: bool,
     pub entrance_easing: String,
     pub hero_image_duration_ms: u32,
+    pub hero_content_duration_ms: u32,
     pub hero_content_delay_ms: u32,
     pub section_duration_ms: u32,
     pub news_item_duration_ms: u32,
     pub item_stagger_ms: u32,
+    pub stats_stagger_ms: u32,
+    pub bar_stagger_ms: u32,
+    pub teaching_duration_ms: u32,
+    pub teaching_stagger_ms: u32,
     pub heatmap_cell_duration_ms: u32,
     pub heatmap_cell_stagger_ms: u32,
     pub theme_transition_ms: u32,
@@ -358,6 +368,7 @@ impl SiteConfig {
         self.validate_urls(&mut issues);
         self.validate_identifiers(&mut issues);
         self.validate_ranges(&mut issues);
+        self.validate_animation_ranges(&mut issues);
         self.validate_footer_template(&mut issues);
 
         if issues.is_empty() {
@@ -401,9 +412,20 @@ impl SiteConfig {
             ("site.title", self.site.title.as_str()),
             ("site.description", self.site.description.as_str()),
             ("site.language", self.site.language.as_str()),
+            ("site.social_image_alt", self.site.social_image_alt.as_str()),
+            ("site.social_card", self.site.social_card.as_str()),
+            ("site.robots", self.site.robots.as_str()),
+            (
+                "site.skip_to_content_label",
+                self.site.skip_to_content_label.as_str(),
+            ),
             (
                 "site.theme_storage_key",
                 self.site.theme_storage_key.as_str(),
+            ),
+            (
+                "navbar.primary_navigation_label",
+                self.navbar.primary_navigation_label.as_str(),
             ),
             ("navbar.brand", self.navbar.brand.as_str()),
             ("hero.first_name", self.hero.first_name.as_str()),
@@ -591,11 +613,17 @@ impl SiteConfig {
         if self.background.blinking_grid_cell_size_px == 0 {
             issues.push("background.blinking_grid_cell_size_px must be positive".to_owned());
         }
+    }
 
+    fn validate_animation_ranges(&self, issues: &mut Vec<String>) {
         let durations = [
             (
                 "animation.hero_image_duration_ms",
                 self.animation.hero_image_duration_ms,
+            ),
+            (
+                "animation.hero_content_duration_ms",
+                self.animation.hero_content_duration_ms,
             ),
             (
                 "animation.hero_content_delay_ms",
@@ -610,6 +638,19 @@ impl SiteConfig {
                 self.animation.news_item_duration_ms,
             ),
             ("animation.item_stagger_ms", self.animation.item_stagger_ms),
+            (
+                "animation.stats_stagger_ms",
+                self.animation.stats_stagger_ms,
+            ),
+            ("animation.bar_stagger_ms", self.animation.bar_stagger_ms),
+            (
+                "animation.teaching_duration_ms",
+                self.animation.teaching_duration_ms,
+            ),
+            (
+                "animation.teaching_stagger_ms",
+                self.animation.teaching_stagger_ms,
+            ),
             (
                 "animation.heatmap_cell_duration_ms",
                 self.animation.heatmap_cell_duration_ms,
@@ -757,27 +798,25 @@ mod tests {
     #[test]
     fn production_configuration_is_valid() {
         let config = SiteConfig::from_toml(production_source()).expect("production config");
-        assert_eq!(config.hero.first_name, "Tony");
+        assert!(!config.hero.first_name.is_empty());
         assert_eq!(config.publications.items.len(), 3);
         assert_eq!(config.teaching.items.len(), 4);
     }
 
     #[test]
     fn unknown_fields_are_rejected() {
-        let source = production_source().replace(
-            "title = \"Tony Stark Academic Profile\"",
-            "title = \"Tony Stark Academic Profile\"\nunknown = true",
-        );
+        let config = SiteConfig::from_toml(production_source()).expect("production config");
+        let title = format!("title = \"{}\"", config.site.title);
+        let source = production_source().replace(&title, &format!("{title}\nunknown = true"));
         let error = SiteConfig::from_toml(&source).expect_err("unknown key must fail");
         assert!(error.to_string().contains("unknown field `unknown`"));
     }
 
     #[test]
     fn missing_required_fields_are_rejected() {
-        let source = production_source().replace(
-            "description = \"Academic profile, research output, teaching, and activity for Tony Stark.\"\n",
-            "",
-        );
+        let config = SiteConfig::from_toml(production_source()).expect("production config");
+        let description = format!("description = \"{}\"\n", config.site.description);
+        let source = production_source().replace(&description, "");
         let error = SiteConfig::from_toml(&source).expect_err("missing key must fail");
         assert!(error.to_string().contains("missing field `description`"));
     }
@@ -868,7 +907,10 @@ mod tests {
         let config = SiteConfig::from_toml(production_source()).expect("production config");
         assert_eq!(
             config.footer_text(2034),
-            "© Copyright 2034 Tony Stark. Powered by Arc Reactor Core. Hosted by Jarvis."
+            format!(
+                "© Copyright 2034 {}. Powered by {}. Hosted by {}.",
+                config.footer.owner, config.footer.powered_by, config.footer.hosted_by
+            )
         );
 
         let source = production_source().replace("{hosted_by}", "{mystery}");

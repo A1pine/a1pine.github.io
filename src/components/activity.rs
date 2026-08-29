@@ -2,10 +2,10 @@ use dioxus::prelude::*;
 
 use crate::components::model::activity_level;
 use crate::components::reveal::use_reveal_observer;
-use crate::config::{ActivityColor, ActivityConfig};
+use crate::config::{ActivityColor, ActivityConfig, AnimationConfig};
 
 #[component]
-pub fn Activity(config: &'static ActivityConfig) -> Element {
+pub fn Activity(config: &'static ActivityConfig, animation: &'static AnimationConfig) -> Element {
     use_reveal_observer("#activity [data-reveal]");
     let month_divisor = u32::try_from(config.months.len().saturating_sub(1).max(1)).unwrap_or(1);
     let month_width = 100.0 / f64::from(month_divisor);
@@ -13,8 +13,8 @@ pub fn Activity(config: &'static ActivityConfig) -> Element {
     rsx! {
         section { id: config.anchor.clone(), class: "activity-section content-section",
             div { class: "activity-container",
-                h2 { class: "activity-heading reveal reveal-up", "data-reveal": "", {config.heading.clone()} }
-                div { class: "glass-card activity-card reveal reveal-card", "data-reveal": "",
+                h2 { class: "activity-heading reveal reveal-up", "data-reveal": "", style: format!("--reveal-duration: {}ms", animation.section_duration_ms), {config.heading.clone()} }
+                div { class: "glass-card activity-card reveal reveal-card", "data-reveal": "", style: format!("--reveal-duration: {}ms", animation.section_duration_ms),
                     div { class: "activity-scroll", tabindex: "0", aria_label: config.heading.clone(),
                         div { class: "activity-grid-wrap",
                             div { class: "month-labels",
@@ -32,7 +32,7 @@ pub fn Activity(config: &'static ActivityConfig) -> Element {
                                     for week in 0..u32::from(config.weeks) {
                                         div { class: "heatmap-week", role: "row",
                                             for day in 0..u32::from(config.days) {
-                                                HeatmapCell { config, week, day }
+                                                HeatmapCell { config, animation, week, day }
                                             }
                                         }
                                     }
@@ -54,7 +54,12 @@ pub fn Activity(config: &'static ActivityConfig) -> Element {
 }
 
 #[component]
-fn HeatmapCell(config: &'static ActivityConfig, week: u32, day: u32) -> Element {
+fn HeatmapCell(
+    config: &'static ActivityConfig,
+    animation: &'static AnimationConfig,
+    week: u32,
+    day: u32,
+) -> Element {
     let level = activity_level(
         week,
         day,
@@ -65,7 +70,7 @@ fn HeatmapCell(config: &'static ActivityConfig, week: u32, day: u32) -> Element 
         config.level_thresholds,
     );
     let color = &config.level_colors[usize::from(level)];
-    let delay = (week * u32::from(config.days) + day) * 6;
+    let delay = (week * u32::from(config.days) + day) * animation.heatmap_cell_stagger_ms;
     let title = format!("{}: {level}", config.level_title_prefix);
 
     rsx! {
@@ -76,8 +81,8 @@ fn HeatmapCell(config: &'static ActivityConfig, week: u32, day: u32) -> Element 
             title: title.clone(),
             aria_label: title,
             style: format!(
-                "--cell-light: {}; --cell-dark: {}; --cell-delay: {}ms",
-                color.light, color.dark, delay
+                "--cell-light: {}; --cell-dark: {}; --cell-delay: {}ms; --cell-duration: {}ms",
+                color.light, color.dark, delay, animation.heatmap_cell_duration_ms
             ),
         }
     }

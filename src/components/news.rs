@@ -1,16 +1,17 @@
 use dioxus::prelude::*;
 
 use crate::components::reveal::use_reveal_observer;
-use crate::config::{NewsConfig, TagStyle};
+use crate::config::{AnimationConfig, NewsConfig, TagStyle};
 
 #[component]
-pub fn News(config: &'static NewsConfig) -> Element {
+pub fn News(config: &'static NewsConfig, animation: &'static AnimationConfig) -> Element {
     use_reveal_observer("#news [data-reveal]");
 
     rsx! {
         section { id: config.anchor.clone(), class: "news-section content-section",
             div { class: "news-container",
                 h2 { class: "section-heading news-heading reveal reveal-up", "data-reveal": "",
+                    style: format!("--reveal-duration: {}ms", animation.section_duration_ms),
                     span { class: "section-accent", aria_hidden: "true" }
                     {config.heading.clone()}
                 }
@@ -19,7 +20,11 @@ pub fn News(config: &'static NewsConfig) -> Element {
                         article {
                             class: "news-item reveal reveal-card",
                             "data-reveal": "",
-                            style: format!("--reveal-delay: {}ms", index * 250),
+                            style: format!(
+                                "--reveal-delay: {}ms; --reveal-duration: {}ms",
+                                index * animation.item_stagger_ms as usize,
+                                animation.news_item_duration_ms,
+                            ),
                             div { class: "timeline-dot", aria_hidden: "true",
                                 span { class: "timeline-dot-ring" }
                             }

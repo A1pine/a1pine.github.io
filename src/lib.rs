@@ -1,6 +1,8 @@
 pub mod app;
 pub mod components;
 pub mod config;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod finalize;
 
 pub use app::App;
 

@@ -5,11 +5,16 @@ language = "en"
 canonical_url = "https://example.com/"
 favicon_url = "/assets/favicon.ico"
 social_image_url = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1200&auto=format&fit=crop"
+social_image_alt = "Tony Stark academic profile"
+social_card = "summary_large_image"
+robots = "index, follow"
+skip_to_content_label = "Skip to main content"
 default_theme = "system"
 theme_storage_key = "arcademic-color-mode"
 base_path = ""
 
 [navbar]
+primary_navigation_label = "Primary navigation"
 brand = "Tony Stark"
 brand_url = "#home"
 cv_label = "CV"
@@ -317,10 +322,15 @@ enabled = true
 respect_reduced_motion = true
 entrance_easing = "cubic-bezier(0.22, 1.35, 0.36, 1)"
 hero_image_duration_ms = 800
+hero_content_duration_ms = 650
 hero_content_delay_ms = 200
 section_duration_ms = 1200
 news_item_duration_ms = 1500
 item_stagger_ms = 250
+stats_stagger_ms = 150
+bar_stagger_ms = 100
+teaching_duration_ms = 600
+teaching_stagger_ms = 100
 heatmap_cell_duration_ms = 350
 heatmap_cell_stagger_ms = 6
 theme_transition_ms = 1000
@@ -338,4 +348,3 @@ light_text = "#0f172a"
 dark_text = "#f8fafc"
 light_card = "rgba(255, 255, 255, 0.65)"
 dark_card = "rgba(15, 23, 42, 0.65)"
-
