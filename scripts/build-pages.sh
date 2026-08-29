@@ -40,11 +40,13 @@ if [[ -n "${base_path}" ]]; then
   build_args+=(--base-path "${base_path}")
 fi
 
-cd "${project_root}"
-"${dioxus_cli}" "${build_args[@]}"
-
-source_dir="${project_root}/target/dx/arcademic-rust/${profile_dir}/web/public"
+build_web_dir="${project_root}/target/dx/arcademic-rust/${profile_dir}/web"
+source_dir="${build_web_dir}/public"
 output_dir="${project_root}/dist/public"
+
+cd "${project_root}"
+rm -rf -- "${build_web_dir}"
+"${dioxus_cli}" "${build_args[@]}"
 
 test -s "${source_dir}/index.html"
 
@@ -52,7 +54,7 @@ rm -rf -- "${output_dir}"
 mkdir -p "${output_dir}"
 cp -R "${source_dir}/." "${output_dir}/"
 cargo run --locked --quiet --bin finalize-pages -- \
-  "${output_dir}/index.html" "${base_path}"
+  "${output_dir}/index.html" "${base_path}" "${output_dir}/404.html"
 touch "${output_dir}/.nojekyll"
 
 echo "Pages artifact: ${output_dir}"

@@ -1,6 +1,7 @@
 use std::io;
 use std::path::Path;
 
+use lol_html::html_content::ContentType;
 use lol_html::{RewriteStrSettings, element, rewrite_str};
 
 use crate::config::SiteConfig;
@@ -38,6 +39,14 @@ pub fn finalize_pages(
                     element.set_attribute("style", &body_theme_variables)?;
                     Ok(())
                 }),
+                element!("[href]", |element| {
+                    normalize_root_reference(element, "href")?;
+                    Ok(())
+                }),
+                element!("[src]", |element| {
+                    normalize_root_reference(element, "src")?;
+                    Ok(())
+                }),
             ],
             ..RewriteStrSettings::default()
         },
@@ -47,6 +56,65 @@ pub fn finalize_pages(
     verify_configured_content(&rewritten, base_path, config, build_year)?;
     std::fs::write(index_path, rewritten)?;
     Ok(())
+}
+
+fn normalize_root_reference(
+    element: &mut lol_html::html_content::Element<'_, '_>,
+    attribute: &str,
+) -> Result<(), lol_html::errors::AttributeNameError> {
+    if let Some(value) = element.get_attribute(attribute)
+        && let Some(normalized) = value.strip_prefix("/./")
+    {
+        element.set_attribute(attribute, &format!("/{normalized}"))?;
+    }
+    Ok(())
+}
+
+/// Writes a GitHub Pages 404 document that preserves SSR content and redirects
+/// unknown paths to the configured site root.
+///
+/// # Errors
+///
+/// Returns an error when the finalized index cannot be read, rewritten, or
+/// written to `not_found_path`.
+pub fn write_pages_404(
+    index_path: &Path,
+    not_found_path: &Path,
+    base_path: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let source = std::fs::read_to_string(index_path)?;
+    let redirect = pages_root(base_path);
+    let refresh_source = format!("0; url={redirect}");
+    let refresh = html_escape::encode_double_quoted_attribute(&refresh_source);
+    let meta = format!(r#"<meta http-equiv="refresh" content="{refresh}">"#);
+    let rewritten = rewrite_str(
+        &source,
+        RewriteStrSettings {
+            element_content_handlers: vec![
+                element!("head", move |element| {
+                    element.append(&meta, ContentType::Html);
+                    Ok(())
+                }),
+                element!("body", |element| {
+                    element.set_attribute("data-pages-404", "true")?;
+                    Ok(())
+                }),
+            ],
+            ..RewriteStrSettings::default()
+        },
+    )
+    .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error.to_string()))?;
+    std::fs::write(not_found_path, rewritten)?;
+    Ok(())
+}
+
+fn pages_root(base_path: &str) -> String {
+    let base_path = base_path.trim_matches('/');
+    if base_path.is_empty() {
+        "/".to_owned()
+    } else {
+        format!("/{base_path}/")
+    }
 }
 
 pub fn configured_values(config: &SiteConfig, build_year: i32) -> Vec<String> {
@@ -220,5 +288,27 @@ mod tests {
         )
         .expect_err("empty page must fail");
         assert!(error.to_string().contains(&config.site.title));
+    }
+
+    #[test]
+    fn pages_404_preserves_content_and_targets_the_configured_root() {
+        let directory =
+            std::env::temp_dir().join(format!("arcademic-finalizer-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).expect("temporary directory");
+        let index = directory.join("index.html");
+        let not_found = directory.join("404.html");
+        std::fs::write(
+            &index,
+            "<html><head><title>Profile</title></head><body>SSR body</body></html>",
+        )
+        .expect("temporary index");
+
+        write_pages_404(&index, &not_found, "/arcademic-rust/").expect("404 document");
+        let output = std::fs::read_to_string(&not_found).expect("generated 404");
+        assert!(output.contains("SSR body"));
+        assert!(output.contains("data-pages-404=\"true\""));
+        assert!(output.contains("0; url=/arcademic-rust/"));
+
+        std::fs::remove_dir_all(directory).expect("remove temporary directory");
     }
 }
