@@ -1,0 +1,66 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.91.1
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install Dioxus CLI
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install pinned Dioxus CLI
+        run: cargo binstall dioxus-cli@0.7.3 --locked --no-confirm
+
+      - name: Verify Rust code
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets --all-features -- -D warnings
+          cargo test --all-features
+
+      - name: Build pre-rendered site
+        env:
+          BASE_PATH: ${{ github.event.repository.name }}
+          DIOXUS_CLI: /home/runner/.cargo/bin/dx
+        run: scripts/build-pages.sh "$BASE_PATH" release
+
+      - name: Prepare Pages artifact
+        run: test -s dist/public/index.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -39,10 +39,10 @@ Scores are 1 (poor fit) through 5 (excellent fit). Weighted total is out of
 ### Dioxus
 
 Dioxus 0.7.3 is selected. Its stable fullstack toolchain supports static site
-generation directly: `dx bundle --web --ssg` runs the application, obtains a
-static route list, pre-renders HTML, and emits a `public` directory containing
-the HTML, assets, JavaScript, and WASM. The official documentation explicitly
-identifies GitHub Pages as a target for this output.
+generation: `dx build --web --ssg` runs the application, obtains a static route
+list, and pre-renders HTML into the web `public` directory alongside assets,
+JavaScript, and WASM. The official documentation explicitly identifies GitHub
+Pages as a target for this output.
 
 RSX produces normal HTML, so the existing Tailwind-derived design can be
 ported to explicit CSS without canvas rendering or accessibility shims.
@@ -118,6 +118,11 @@ Positive outcomes:
 Risks and mitigations:
 
 - Dioxus CLI or SSG changes: pin versions and run the real SSG command in CI.
+- Dioxus CLI 0.7.3 accepts `bundle --ssg` but `bundle.rs` has an upstream TODO
+  and does not invoke pre-rendering. The repository therefore uses
+  `scripts/build-pages.sh`: `dx build --ssg --force-sequential true` followed
+  by packaging only the generated `public` directory. A custom Dioxus Axum
+  router keeps the CLI's fixed root SSG endpoint reachable with a base path.
 - Hydration mismatch: use one component tree and the same embedded config for
   server rendering and the web build; fail E2E tests on console errors.
 - Project subpath failures: validate asset requests from a non-root base-path
@@ -133,4 +138,3 @@ Reconsider Leptos only if Dioxus 0.7 cannot satisfy one of these proven gates:
 2. Hydration cannot preserve the server-rendered DOM without errors.
 3. The generated bundle cannot be hosted under a repository subpath.
 4. Required semantic or browser interactions need a custom renderer.
-

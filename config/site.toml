@@ -1,0 +1,341 @@
+[site]
+title = "Tony Stark Academic Profile"
+description = "Academic profile, research output, teaching, and activity for Tony Stark."
+language = "en"
+canonical_url = "https://example.com/"
+favicon_url = "/assets/favicon.ico"
+social_image_url = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1200&auto=format&fit=crop"
+default_theme = "system"
+theme_storage_key = "arcademic-color-mode"
+base_path = ""
+
+[navbar]
+brand = "Tony Stark"
+brand_url = "#home"
+cv_label = "CV"
+cv_url = "#"
+show_cv = true
+theme_toggle_label = "Toggle Theme"
+mobile_menu_open_label = "Open navigation"
+mobile_menu_close_label = "Close navigation"
+
+[[navbar.links]]
+name = "Home"
+href = "#home"
+
+[[navbar.links]]
+name = "About"
+href = "#about"
+
+[[navbar.links]]
+name = "News"
+href = "#news"
+
+[[navbar.links]]
+name = "Research"
+href = "#publications"
+
+[[navbar.links]]
+name = "Teaching"
+href = "#teaching"
+
+[[navbar.links]]
+name = "Activity"
+href = "#activity"
+
+[hero]
+anchor = "home"
+about_anchor = "about"
+first_name = "Tony"
+last_name = "Stark"
+role = "Futurist • Engineer • Academic"
+location = "New York, NY"
+company = "Stark Industries"
+bio = "I am the CEO of Stark Industries and the primary benefactor of the Avengers Initiative. My research focuses on solving the world's existential threats through advanced technology, establishing new paradigms in clean energy (Arc Reactor), artificial intelligence (JARVIS), and nanotechnology."
+image_url = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=800&auto=format&fit=crop"
+image_alt = "Tony Stark"
+interests_title = "Research Interests"
+timezone_offset_hours = 8
+working_hours_start = 9
+working_hours_end = 18
+available_title = "Available for collaboration"
+offline_title = "Currently offline"
+
+[[hero.interests]]
+name = "Clean Energy"
+
+[[hero.interests]]
+name = "Artificial Intelligence"
+
+[[hero.interests]]
+name = "Nanotechnology"
+
+[[hero.interests]]
+name = "Robotics"
+
+[[hero.interests]]
+name = "High Energy Physics"
+
+[[hero.social_links]]
+platform = "Email"
+icon = "mail"
+url = "mailto:tony@stark.com"
+username = "tony@stark.com"
+
+[[hero.social_links]]
+platform = "Twitter"
+icon = "twitter"
+url = "https://twitter.com/TonyStark"
+username = "@TonyStark"
+
+[[hero.social_links]]
+platform = "GitHub"
+icon = "github"
+url = "https://github.com/TonyStark"
+username = "TonyStark"
+
+[news]
+anchor = "news"
+heading = "Latest News"
+
+[[news.items]]
+id = "1"
+date = "Dec 2024"
+title = "Arc Reactor Technology"
+description = "Successfully deployed clean energy solutions to power 50% of New York City using Arc Reactor technology."
+tag = "Product"
+
+[[news.items]]
+id = "2"
+date = "Nov 2024"
+title = "AI Breakthrough"
+description = "Released JARVIS 2.0, the world's most advanced AI assistant. Published in Nature and Science."
+tag = "Research"
+
+[[news.items]]
+id = "3"
+date = "Oct 2024"
+title = "Stark Expo 2024"
+description = "Announcing the next generation of Iron Man suits with integrated nanotechnology."
+tag = "Keynote"
+
+[[news.tag_styles]]
+name = "Product"
+light_background = "#dbeafe"
+light_text = "#1d4ed8"
+dark_background = "#1e3a8a66"
+dark_text = "#bfdbfe"
+
+[[news.tag_styles]]
+name = "Research"
+light_background = "#f3e8ff"
+light_text = "#7e22ce"
+dark_background = "#581c8766"
+dark_text = "#e9d5ff"
+
+[[news.tag_styles]]
+name = "Keynote"
+light_background = "#fef3c7"
+light_text = "#b45309"
+dark_background = "#78350f66"
+dark_text = "#fde68a"
+
+[publications]
+anchor = "publications"
+heading = "Selected Research"
+subtitle = "Pushing the boundaries of clean energy and artificial intelligence."
+total_label = "Total Publications"
+total_value = "142"
+citations_label = "Citations"
+citations_value = "12.8k"
+output_heading = "Research Output"
+output_range = "Last 5 Years"
+papers_label = "Papers"
+pdf_label = "↓ PDF"
+code_label = "↗ Code"
+highlight_author = "T. Stark"
+
+[[publications.stats]]
+year = 2020
+count = 5
+
+[[publications.stats]]
+year = 2021
+count = 8
+
+[[publications.stats]]
+year = 2022
+count = 12
+
+[[publications.stats]]
+year = 2023
+count = 18
+
+[[publications.stats]]
+year = 2024
+count = 24
+
+[[publications.items]]
+id = "p1"
+title = "Particle acceleration in self-sustaining fusion reactions"
+venue = "Nature Physics"
+year = 2024
+authors = ["T. Stark", "B. Banner"]
+description = "Proposed a new method for stabilizing tokamak fields using miniaturized arc reactor technology. This paper demonstrates a 300% efficiency increase in plasma containment fields."
+tags = ["Fusion", "Energy", "Physics"]
+image_url = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop"
+image_alt = "Earth viewed from space"
+pdf_url = ""
+code_url = ""
+
+[[publications.items]]
+id = "p2"
+title = "Nanotech Integration in Human-Machine Interfaces"
+venue = "Science Robotics"
+year = 2023
+authors = ["T. Stark", "P. Parker"]
+description = "Developing a neural link mesh for seamless control of prosthetic limbs with millisecond latency. The study introduces the 'Bleeding Edge' architecture for reversible nanotech deployment."
+tags = ["Robotics", "AI", "Nanotech"]
+image_url = "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=75&w=600&auto=format&fit=crop"
+image_alt = "Artificial intelligence visualization"
+pdf_url = ""
+code_url = ""
+
+[[publications.items]]
+id = "p3"
+title = "Autonomous Decision Making in Swarm Intelligence"
+venue = "ICRA"
+year = 2023
+authors = ["T. Stark", "J. Rhodes"]
+description = "Algorithms for decentralized command structures in autonomous drone legions (Iron Legion protocol). Focuses on collision avoidance and distributed target acquisition without central processing."
+tags = ["AI", "Swarm", "Control"]
+image_url = "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=600&auto=format&fit=crop"
+image_alt = "Humanoid robot"
+pdf_url = ""
+code_url = ""
+
+[teaching]
+anchor = "teaching"
+heading = "Teaching at Stark Industries"
+semester_prefix = "Last"
+
+[[teaching.items]]
+id = "1"
+code = "STARK101"
+title = "Introduction to Arc Reactor Technology"
+semester = "Fall 2024"
+description = "Fundamentals of palladium core degradation and new element synthesis."
+materials_url = ""
+
+[[teaching.items]]
+id = "2"
+code = "STARK201"
+title = "Advanced AI Systems"
+semester = "Fall 2024"
+description = "From JARVIS to FRIDAY: Designing conversational interfaces and predictive combat algorithms."
+materials_url = ""
+
+[[teaching.items]]
+id = "3"
+code = "STARK301"
+title = "Quantum Engineering"
+semester = "Spring 2024"
+description = "Navigating the quantum realm for time dilation and energy retrieval."
+materials_url = ""
+
+[[teaching.items]]
+id = "4"
+code = "STARK401"
+title = "Nanotechnology and Future Materials"
+semester = "Spring 2024"
+description = "Bleeding edge armor integration and housing units."
+materials_url = ""
+
+[activity]
+anchor = "activity"
+heading = "GitHub Activity"
+less_label = "Less"
+more_label = "More"
+level_title_prefix = "Activity Level"
+weeks = 52
+days = 7
+months = ["Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+day_labels = ["Mon", "Wed", "Fri"]
+seed_week_multiplier = 17
+seed_day_multiplier = 31
+seed_cross_multiplier = 7
+seed_offset = 13
+level_thresholds = [20, 40, 60, 80]
+
+[[activity.level_colors]]
+light = "#e2e8f080"
+dark = "#1e293b80"
+
+[[activity.level_colors]]
+light = "#a7f3d0"
+dark = "#064e3b"
+
+[[activity.level_colors]]
+light = "#6ee7b7"
+dark = "#047857"
+
+[[activity.level_colors]]
+light = "#34d399"
+dark = "#10b981"
+
+[[activity.level_colors]]
+light = "#059669"
+dark = "#34d399"
+
+[background]
+pointer_glow_size_px = 900
+pointer_glow_blur_px = 60
+pointer_glow_color = "rgba(14, 165, 233, 0.3)"
+pointer_glow_fade = "transparent 80%"
+blinking_grid_enabled = true
+blinking_grid_cell_size_px = 40
+blinking_grid_min_cells = 6
+blinking_grid_max_cells = 10
+blinking_grid_interval_ms = 800
+blinking_grid_duration_ms = 3000
+
+[scroll_to_top]
+title = "Scroll to top"
+threshold_px = 300
+behavior = "smooth"
+
+[footer]
+owner = "Tony Stark"
+powered_by = "Arc Reactor Core"
+hosted_by = "Jarvis"
+year_mode = "build"
+fixed_year = 2026
+text_template = "© Copyright {year} {owner}. Powered by {powered_by}. Hosted by {hosted_by}."
+
+[animation]
+enabled = true
+respect_reduced_motion = true
+entrance_easing = "cubic-bezier(0.22, 1.35, 0.36, 1)"
+hero_image_duration_ms = 800
+hero_content_delay_ms = 200
+section_duration_ms = 1200
+news_item_duration_ms = 1500
+item_stagger_ms = 250
+heatmap_cell_duration_ms = 350
+heatmap_cell_stagger_ms = 6
+theme_transition_ms = 1000
+image_transition_ms = 500
+hover_lift_px = 4.0
+heatmap_hover_scale = 1.3
+
+[design]
+primary = "#0ea5e9"
+primary_dark = "#0284c7"
+secondary = "#6366f1"
+light_background = "#f8fafc"
+dark_background = "#050914"
+light_text = "#0f172a"
+dark_text = "#f8fafc"
+light_card = "rgba(255, 255, 255, 0.65)"
+dark_card = "rgba(15, 23, 42, 0.65)"
+

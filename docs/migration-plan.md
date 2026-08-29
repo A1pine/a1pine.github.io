@@ -62,7 +62,7 @@ Integration and acceptance:
 
 - `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`,
   and `cargo test --all-features` pass.
-- `dx bundle --web --ssg` succeeds.
+- `scripts/build-pages.sh arcademic-rust release` succeeds using Dioxus SSG.
 - Generated `index.html` contains configured name, biography, section labels,
   publication titles, course titles, and activity labels before JavaScript.
 - The generated artifact contains no absolute root asset URL when built with
@@ -239,4 +239,3 @@ Acceptance:
   evidence and reports no missing or indirect proof.
 
 Commit: `phase 7: finalize github pages delivery`
-

@@ -1,0 +1,15 @@
+[application]
+name = "arcademic-rust"
+out_dir = "target_dx"
+asset_dir = "assets"
+
+[web.app]
+title = "Arcademic Rust"
+
+[web.resource]
+style = []
+script = []
+
+[web.resource.dev]
+script = []
+

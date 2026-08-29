@@ -14,3 +14,12 @@ The application implementation starts in phase 1. The target output is a
 pre-rendered static site that can be hosted from a GitHub Pages project path
 without a runtime server.
 
+## Build commands
+
+```bash
+cargo test --all-features
+scripts/build-pages.sh arcademic-rust release
+```
+
+The second command writes the deployable artifact to `dist/public`. The base
+path argument is omitted for root-domain hosting.
