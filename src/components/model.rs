@@ -77,6 +77,17 @@ pub fn target_cell_count(random: f64, minimum: u8, maximum: u8) -> usize {
     usize::from(minimum) + (normalized * f64::from(span)).floor() as usize
 }
 
+pub fn normalize_counts(counts: &[u16]) -> Vec<f64> {
+    let maximum = counts.iter().copied().max().unwrap_or(0);
+    if maximum == 0 {
+        return vec![0.0; counts.len()];
+    }
+    counts
+        .iter()
+        .map(|count| f64::from(*count) / f64::from(maximum))
+        .collect()
+}
+
 #[cfg(target_arch = "wasm32")]
 pub fn persist_theme(storage_key: &str, theme: ThemeChoice) {
     if let Some(window) = web_sys::window()
@@ -170,5 +181,19 @@ mod tests {
         assert_eq!(target_cell_count(0.0, 6, 10), 6);
         assert_eq!(target_cell_count(1.0, 6, 10), 10);
         assert!((6..=10).contains(&target_cell_count(0.45, 6, 10)));
+    }
+
+    #[test]
+    fn count_normalization_handles_empty_and_zero_data() {
+        assert!(normalize_counts(&[]).is_empty());
+        assert_eq!(normalize_counts(&[0, 0]), vec![0.0, 0.0]);
+    }
+
+    #[test]
+    fn count_normalization_preserves_relative_height() {
+        let normalized = normalize_counts(&[5, 10, 20]);
+        assert!((normalized[0] - 0.25).abs() < f64::EPSILON);
+        assert!((normalized[1] - 0.5).abs() < f64::EPSILON);
+        assert!((normalized[2] - 1.0).abs() < f64::EPSILON);
     }
 }

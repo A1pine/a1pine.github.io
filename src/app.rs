@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
 use crate::components::initialize_theme;
-use crate::components::{Hero, InteractiveBackground, Navbar};
+use crate::components::{Hero, InteractiveBackground, Navbar, News, Research};
 use crate::config::{SiteConfig, site_config};
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -106,88 +106,8 @@ fn SiteShell(config: &'static SiteConfig) -> Element {
 
             main { class: "site-main",
                 Hero { config: &config.hero }
-
-                section { id: config.news.anchor.clone(),
-                    h2 { {config.news.heading.clone()} }
-                    ol {
-                        for item in &config.news.items {
-                            li {
-                                time { {item.date.clone()} }
-                                span { {item.tag.clone()} }
-                                h3 { {item.title.clone()} }
-                                p { {item.description.clone()} }
-                            }
-                        }
-                    }
-                }
-
-                section { id: config.publications.anchor.clone(),
-                    h2 { {config.publications.heading.clone()} }
-                    p { {config.publications.subtitle.clone()} }
-                    dl {
-                        dt { {config.publications.total_label.clone()} }
-                        dd { {config.publications.total_value.clone()} }
-                        dt { {config.publications.citations_label.clone()} }
-                        dd { {config.publications.citations_value.clone()} }
-                    }
-                    h3 { {config.publications.output_heading.clone()} }
-                    p { {config.publications.output_range.clone()} }
-                    ul {
-                        for stat in &config.publications.stats {
-                            li {
-                                "{stat.year}: {stat.count} "
-                                {config.publications.papers_label.clone()}
-                            }
-                        }
-                    }
-                    div {
-                        for publication in &config.publications.items {
-                            article {
-                                img {
-                                    src: publication.image_url.clone(),
-                                    alt: publication.image_alt.clone(),
-                                    width: "576",
-                                    height: "384",
-                                    loading: "lazy",
-                                }
-                                p { "{publication.venue} • {publication.year}" }
-                                h3 { {publication.title.clone()} }
-                                p {
-                                    for (index, author) in publication.authors.iter().enumerate() {
-                                        span {
-                                            {author.clone()}
-                                            if index + 1 < publication.authors.len() { ", " }
-                                        }
-                                    }
-                                }
-                                p { {publication.description.clone()} }
-                                ul {
-                                    for tag in &publication.tags {
-                                        li { "#{tag}" }
-                                    }
-                                }
-                                if publication.pdf_url.is_empty() {
-                                    button { r#type: "button", disabled: true,
-                                        {config.publications.pdf_label.clone()}
-                                    }
-                                } else {
-                                    a { href: publication.pdf_url.clone(),
-                                        {config.publications.pdf_label.clone()}
-                                    }
-                                }
-                                if publication.code_url.is_empty() {
-                                    button { r#type: "button", disabled: true,
-                                        {config.publications.code_label.clone()}
-                                    }
-                                } else {
-                                    a { href: publication.code_url.clone(),
-                                        {config.publications.code_label.clone()}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                News { config: &config.news }
+                Research { config: &config.publications }
 
                 section { id: config.teaching.anchor.clone(),
                     h2 { {config.teaching.heading.clone()} }
