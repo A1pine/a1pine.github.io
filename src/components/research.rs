@@ -7,6 +7,7 @@ use crate::components::model::{
 };
 use crate::components::reveal::use_reveal_observer;
 use crate::config::{AnimationConfig, PublicationsConfig};
+use crate::localization::{translate, translate_template, use_locale};
 
 #[component]
 pub fn Research(
@@ -20,6 +21,16 @@ pub fn Research(
         .map(|stat| stat.count)
         .collect::<Vec<_>>();
     let scales = normalize_counts(&counts);
+    let locale = use_locale();
+    let empty_message = translate(locale, "publications.empty", &config.empty_message);
+    let last_updated = (!config.last_updated.is_empty()).then(|| {
+        translate_template(
+            locale,
+            "publications.last_updated_template",
+            &config.last_updated_template,
+            &[("date", config.last_updated.as_str())],
+        )
+    });
 
     rsx! {
         section { id: config.anchor.clone(), class: "research-section content-section",
@@ -53,27 +64,29 @@ pub fn Research(
                             }
                             span { class: "output-range", {config.output_range.clone()} }
                         }
-                        div {
-                            class: "bar-chart",
-                            tabindex: "0",
-                            aria_label: config.output_heading.clone(),
-                            for (index, stat) in config.stats.iter().enumerate() {
-                                div { class: "bar-column",
-                                    div { class: "bar-tooltip",
-                                        "{stat.count} "
-                                        {config.papers_label.clone()}
-                                        span { aria_hidden: "true" }
-                                    }
-                                    div { class: "bar-track",
-                                        div {
-                                            class: "bar-fill",
-                                            style: format!(
-                                                "--bar-scale: {}; --bar-delay: {}ms",
-                                                scales[index], index * animation.bar_stagger_ms as usize
-                                            ),
+                        if !config.stats.is_empty() {
+                            div {
+                                class: "bar-chart",
+                                tabindex: "0",
+                                aria_label: config.output_heading.clone(),
+                                for (index, stat) in config.stats.iter().enumerate() {
+                                    div { class: "bar-column",
+                                        div { class: "bar-tooltip",
+                                            "{stat.count} "
+                                            {config.papers_label.clone()}
+                                            span { aria_hidden: "true" }
                                         }
+                                        div { class: "bar-track",
+                                            div {
+                                                class: "bar-fill",
+                                                style: format!(
+                                                    "--bar-scale: {}; --bar-delay: {}ms",
+                                                    scales[index], index * animation.bar_stagger_ms as usize
+                                                ),
+                                            }
+                                        }
+                                        span { class: "bar-year", "{stat.year}" }
                                     }
-                                    span { class: "bar-year", "{stat.year}" }
                                 }
                             }
                         }
@@ -91,15 +104,24 @@ pub fn Research(
                                 animation.news_item_duration_ms,
                             ),
                             div { class: "publication-image",
-                                img {
-                                    src: unsplash_with_width(&publication.image_url, 576),
-                                    srcset: image_srcset(&publication.image_url, &[320, 576, 800]),
-                                    sizes: "(min-width: 768px) 288px, calc(100vw - 80px)",
-                                    alt: publication.image_alt.clone(),
-                                    width: "576",
-                                    height: "384",
-                                    loading: "lazy",
-                                    decoding: "async",
+                                if publication.image_url.is_empty() {
+                                    div { class: "publication-cover",
+                                        span { class: "publication-cover-mark", aria_hidden: "true" }
+                                        span { class: "publication-cover-text",
+                                            {publication.venue.clone()}
+                                        }
+                                    }
+                                } else {
+                                    img {
+                                        src: unsplash_with_width(&publication.image_url, 576),
+                                        srcset: image_srcset(&publication.image_url, &[320, 576, 800]),
+                                        sizes: "(min-width: 768px) 288px, calc(100vw - 80px)",
+                                        alt: publication.image_alt.clone(),
+                                        width: "576",
+                                        height: "384",
+                                        loading: "lazy",
+                                        decoding: "async",
+                                    }
                                 }
                             }
                             div { class: "publication-body",
@@ -119,10 +141,14 @@ pub fn Research(
                                         }
                                     }
                                 }
-                                p { class: "publication-description", {publication.description.clone()} }
+                                if !publication.description.is_empty() {
+                                    p { class: "publication-description", {publication.description.clone()} }
+                                }
                                 div { class: "publication-footer",
                                     div { class: "publication-tags",
-                                        for tag in &publication.tags { span { "#{tag}" } }
+                                        if !publication.tags.is_empty() {
+                                            for tag in &publication.tags { span { "#{tag}" } }
+                                        }
                                     }
                                     div { class: "publication-actions",
                                         PublicationAction {
@@ -135,11 +161,28 @@ pub fn Research(
                                             url: publication.code_url.clone(),
                                             primary: true,
                                         }
+                                        span {
+                                            class: "publication-citations",
+                                            {translate_template(
+                                                locale,
+                                                "publications.citation_template",
+                                                &config.citation_template,
+                                                &[("count", &publication.citations.to_string())],
+                                            )}
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                }
+                if config.items.is_empty() {
+                    div { class: "glass-card publication-empty reveal reveal-card", "data-reveal": "",
+                        {empty_message.clone()}
+                    }
+                }
+                if let Some(updated) = last_updated.clone() {
+                    p { class: "publications-updated", {updated} }
                 }
             }
         }

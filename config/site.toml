@@ -35,6 +35,10 @@ name = "Experience"
 href = "#experience"
 
 [[navbar.links]]
+name = "Research"
+href = "#publications"
+
+[[navbar.links]]
 name = "Activity"
 href = "#activity"
 
@@ -140,7 +144,7 @@ dark_background = "#581c8766"
 dark_text = "#e9d5ff"
 
 [publications]
-enabled = false
+enabled = true
 anchor = "publications"
 heading = "Selected Research"
 subtitle = "Research in AI for science and engineering."
@@ -151,7 +155,10 @@ citations_value = "0"
 output_heading = "Research Output"
 output_range = "Last 5 Years"
 papers_label = "Papers"
-pdf_label = "↓ PDF"
+citation_template = "Cited by {count}"
+last_updated_template = "Last updated: {date}"
+empty_message = "Publications are synced automatically from Google Scholar."
+pdf_label = "↗ Paper"
 code_label = "↗ Code"
 highlight_author = "X. Tan"
 

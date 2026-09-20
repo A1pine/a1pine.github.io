@@ -60,16 +60,20 @@ test('renders the configured personal profile with stable media geometry', async
   await openSite(page)
 
   await activateSection(page, 'Experience & Education')
+  await activateSection(page, 'Selected Research')
   await activateSection(page, 'GitHub Contributions')
 
-  await expect(page.getByRole('article')).toHaveCount(4)
+  await expect(page.locator('#experience article')).toHaveCount(4)
   const advisorLinks = page.locator('.news-description-link')
   await expect(advisorLinks).toHaveCount(2)
   await expect(advisorLinks.nth(0)).toHaveText('Prof. Junhua Zhao')
   await expect(advisorLinks.nth(0)).toHaveAttribute('href', 'https://www.zhaojunhua.org/')
   await expect(advisorLinks.nth(1)).toHaveText('Prof. Jianwei Huang')
   await expect(advisorLinks.nth(1)).toHaveAttribute('href', 'https://jianwei.cuhk.edu.cn/')
-  await expect(page.locator('#publications, #teaching')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Selected Research' })).toBeVisible()
+  await expect(page.locator('.publication-empty')).toBeVisible()
+  await expect(page.locator('.publications-updated')).toHaveCount(0)
+  await expect(page.locator('#teaching')).toHaveCount(0)
   await expect(page.locator('.activity-summary')).toHaveAttribute('data-live-state', 'loaded')
   await expect(page.locator('.activity-summary')).toHaveText('210 contributions in the last year')
   const vibeLink = page.getByRole('link', { name: 'VibeUsage for the last 7 days' })
@@ -386,7 +390,8 @@ test('keeps complete semantic content without JavaScript', async ({ browser }) =
     level: 3,
     name: 'NetEase Games, Guangzhou',
   })).toHaveCount(1)
-  await expect(page.locator('#publications, #teaching')).toHaveCount(0)
+  await expect(page.locator('#publications')).toHaveCount(1)
+  await expect(page.locator('#teaching')).toHaveCount(0)
   await expect(page.getByRole('gridcell')).toHaveCount(0)
   await expect(page.locator('.heatmap-skeleton')).toHaveCount(1)
   await expect(page.locator('.activity-summary')).toHaveText('Loading GitHub contribution data...')

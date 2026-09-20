@@ -214,8 +214,12 @@ pub fn configured_values(config: &SiteConfig, build_year: i32) -> Vec<String> {
             item_values.extend(item.authors.clone());
             item_values.extend(item.tags.clone());
             item_values.extend([item.pdf_url.clone(), item.code_url.clone()]);
+            item_values.push(item.citations.to_string());
             item_values
         }));
+        if !config.publications.last_updated.is_empty() {
+            values.push(config.publications.last_updated.clone());
+        }
     }
     if config.teaching.enabled {
         values.extend(config.teaching.items.iter().flat_map(|item| {
@@ -285,10 +289,14 @@ fn base_configured_values(config: &SiteConfig, build_year: i32) -> Vec<String> {
             config.publications.citations_value.clone(),
             config.publications.output_heading.clone(),
             config.publications.output_range.clone(),
-            config.publications.papers_label.clone(),
-            config.publications.pdf_label.clone(),
-            config.publications.code_label.clone(),
         ]);
+        if !config.publications.items.is_empty() {
+            values.push(config.publications.pdf_label.clone());
+            values.push(config.publications.code_label.clone());
+        }
+        if !config.publications.stats.is_empty() {
+            values.push(config.publications.papers_label.clone());
+        }
     }
     if config.teaching.enabled {
         values.extend([

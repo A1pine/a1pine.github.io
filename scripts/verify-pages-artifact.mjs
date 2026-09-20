@@ -73,6 +73,7 @@ for (const token of [
   '<meta name="google-site-verification" content="j-zSpLhdAjkV6kQEJ9w032KVBetc5hpdwjg5XUz4zkU"/>',
   'Xuning TAN',
   'Experience &#38; Education',
+  'Selected Research',
   'The Australian National University',
   'https://github.com/A1pine',
   'GitHub Contributions',
@@ -88,7 +89,7 @@ if (
 ) {
   throw new Error('index is missing the PNG favicon metadata')
 }
-for (const token of ['Tony Stark', 'id="publications"', 'id="teaching"']) {
+for (const token of ['Tony Stark', 'id="teaching"']) {
   if (index.includes(token)) throw new Error(`index contains disabled or stale content: ${token}`)
 }
 if (!/<link rel="preload" href="[^"]+\.wasm" as="fetch" type="application\/wasm" crossorigin>/.test(index)) {

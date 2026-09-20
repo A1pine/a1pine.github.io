@@ -185,6 +185,14 @@ pub struct PublicationsConfig {
     pub code_label: String,
     pub highlight_author: String,
     #[serde(default)]
+    pub citation_template: String,
+    #[serde(default)]
+    pub last_updated_template: String,
+    #[serde(default)]
+    pub empty_message: String,
+    #[serde(default)]
+    pub last_updated: String,
+    #[serde(default)]
     pub stats: Vec<PublicationStat>,
     #[serde(default)]
     pub items: Vec<PublicationItem>,
@@ -211,6 +219,8 @@ pub struct PublicationItem {
     pub image_alt: String,
     pub pdf_url: String,
     pub code_url: String,
+    #[serde(default)]
+    pub citations: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -670,10 +680,9 @@ impl SiteConfig {
         }
 
         for (index, item) in self.publications.items.iter().enumerate() {
-            validate_link(
+            validate_optional_link(
                 &format!("publications.items[{index}].image_url"),
                 &item.image_url,
-                false,
                 issues,
             );
             validate_optional_link(
@@ -874,9 +883,55 @@ pub fn site_config() -> &'static SiteConfig {
         }
         #[cfg(not(target_arch = "wasm32"))]
         {
-            SiteConfig::from_toml(SITE_TOML).expect("embedded config/site.toml must be valid")
+            let mut config =
+                SiteConfig::from_toml(SITE_TOML).expect("embedded config/site.toml must be valid");
+            apply_generated_publications(&mut config);
+            config
+                .validate()
+                .expect("merged site configuration must be valid");
+            config
         }
     })
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, Default, Deserialize)]
+struct GeneratedPublications {
+    #[serde(default)]
+    total_value: Option<String>,
+    #[serde(default)]
+    citations_value: Option<String>,
+    #[serde(default)]
+    last_updated: Option<String>,
+    #[serde(default)]
+    stats: Option<Vec<PublicationStat>>,
+    #[serde(default)]
+    items: Option<Vec<PublicationItem>>,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn apply_generated_publications(config: &mut SiteConfig) {
+    let Ok(source) = std::fs::read_to_string("config/publications.json") else {
+        return;
+    };
+    let generated: GeneratedPublications =
+        serde_json::from_str(&source).expect("config/publications.json must be valid");
+
+    if let Some(total_value) = generated.total_value {
+        config.publications.total_value = total_value;
+    }
+    if let Some(citations_value) = generated.citations_value {
+        config.publications.citations_value = citations_value;
+    }
+    if let Some(last_updated) = generated.last_updated {
+        config.publications.last_updated = last_updated;
+    }
+    if let Some(stats) = generated.stats {
+        config.publications.stats = stats;
+    }
+    if let Some(items) = generated.items {
+        config.publications.items = items;
+    }
 }
 
 pub fn join_base_path(base_path: &str, path: &str) -> String {
@@ -1029,8 +1084,8 @@ mod tests {
     #[test]
     fn duplicate_section_anchors_are_rejected() {
         let source = production_source().replace(
-            "[publications]\nenabled = false\nanchor = \"publications\"",
-            "[publications]\nenabled = false\nanchor = \"experience\"",
+            "[publications]\nenabled = true\nanchor = \"publications\"",
+            "[publications]\nenabled = true\nanchor = \"experience\"",
         );
         let error = SiteConfig::from_toml(&source).expect_err("duplicate anchor must fail");
         assert!(

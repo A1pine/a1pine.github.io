@@ -159,6 +159,7 @@ fn navigation_key(href: &str) -> &'static str {
         "#home" => "navbar.home",
         "#about" => "navbar.about",
         "#experience" => "navbar.experience",
+        "#publications" => "navbar.publications",
         "#activity" => "navbar.activity",
         _ => "navbar.unknown",
     }
