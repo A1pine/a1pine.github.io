@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { chromium } from '@playwright/test'
-import { mkdir, readFileSync, writeFile } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
 const scholarId = process.argv[2] ?? process.env.SCHOLAR_ID
@@ -246,7 +246,7 @@ const output = {
   items: sorted,
 }
 
-mkdir(dirname(outputPath), { recursive: true })
+mkdirSync(dirname(outputPath), { recursive: true })
 let previous = null
 try {
   previous = readFileSync(outputPath, 'utf8')
@@ -255,7 +255,7 @@ try {
 }
 const next = `${JSON.stringify(output, null, 2)}\n`
 if (previous !== next) {
-  writeFile(outputPath, next, 'utf8')
+  writeFileSync(outputPath, next, 'utf8')
   console.log(`${outputPath}: updated ${sorted.length} publications`)
 } else {
   console.log(`${outputPath}: already current (${sorted.length} publications)`)

@@ -71,8 +71,14 @@ test('renders the configured personal profile with stable media geometry', async
   await expect(advisorLinks.nth(1)).toHaveText('Prof. Jianwei Huang')
   await expect(advisorLinks.nth(1)).toHaveAttribute('href', 'https://jianwei.cuhk.edu.cn/')
   await expect(page.getByRole('heading', { name: 'Selected Research' })).toBeVisible()
-  await expect(page.locator('.publication-empty')).toBeVisible()
-  await expect(page.locator('.publications-updated')).toHaveCount(0)
+  await expect(page.locator('.publication-empty')).toHaveCount(0)
+  await expect(page.locator('.publication-card')).toHaveCount(3)
+  await expect(page.locator('.publication-action.secondary')).toHaveCount(3)
+  await expect(page.locator('.publication-action.secondary').first())
+    .toHaveAttribute('href', /scholar\.google\.com\/citations/)
+  await expect(page.locator('.publications-updated'))
+    .toHaveText(/^Last updated: \d{4}-\d{2}-\d{2}$/)
+  await expect(page.locator('.stat-summaries .summary-card').first()).toContainText('3')
   await expect(page.locator('#teaching')).toHaveCount(0)
   await expect(page.locator('.activity-summary')).toHaveAttribute('data-live-state', 'loaded')
   await expect(page.locator('.activity-summary')).toHaveText('210 contributions in the last year')
@@ -112,6 +118,16 @@ test('renders the configured personal profile with stable media geometry', async
     .toHaveAttribute('href', 'https://x.com/XuningTan')
   await expect(page.locator('.social-list > .social-link').nth(1))
     .toHaveAttribute('href', 'https://x.com/XuningTan')
+  await expect(page.getByRole('link', { name: 'Google Scholar link: Xuning TAN' }))
+    .toHaveAttribute(
+      'href',
+      'https://scholar.google.com/citations?user=gPmLhlAAAAAJ&hl=en',
+    )
+  await expect(page.locator('.social-list > .social-link').nth(2))
+    .toHaveAttribute(
+      'href',
+      'https://scholar.google.com/citations?user=gPmLhlAAAAAJ&hl=en',
+    )
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('type', 'image/png')
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('sizes', '256x256')
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /favicon-.+\.png$/)

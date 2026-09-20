@@ -92,6 +92,12 @@ icon = "twitter"
 url = "https://x.com/XuningTan"
 username = "@XuningTan"
 
+[[hero.social_links]]
+platform = "Google Scholar"
+icon = "scholar"
+url = "https://scholar.google.com/citations?user=gPmLhlAAAAAJ&hl=en"
+username = "Xuning TAN"
+
 [news]
 enabled = true
 anchor = "experience"

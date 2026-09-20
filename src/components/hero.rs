@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdBuilding, LdGithub, LdMail, LdMapPin, LdTwitter},
+    icons::ld_icons::{LdBuilding, LdGithub, LdGraduationCap, LdMail, LdMapPin, LdTwitter},
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -262,6 +262,7 @@ fn SocialIcon(name: String) -> Element {
     match name.as_str() {
         "twitter" => rsx! { Icon { icon: LdTwitter, width: 16, height: 16 } },
         "github" => rsx! { Icon { icon: LdGithub, width: 16, height: 16 } },
+        "scholar" => rsx! { Icon { icon: LdGraduationCap, width: 16, height: 16 } },
         _ => rsx! { Icon { icon: LdMail, width: 16, height: 16 } },
     }
 }
