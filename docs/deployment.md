@@ -85,6 +85,6 @@ verifier 要求：
 ## 自定义域名
 
 自定义域通常部署根路径构建。将域名写入 Pages 的 Custom domain 设置并按 GitHub
-给出的 DNS 记录配置。构建脚本在设置 `PAGES_CNAME` 环境变量后会在 artifact 中生成
-对应的 `CNAME` 文件；workflow 已为 `blog.xuningtan.com` 启用该行为。不要手工修改
+给出的 DNS 记录配置。仓库根目录的 `CNAME` 与构建脚本在设置 `PAGES_CNAME` 环境
+变量后生成的 artifact `CNAME` 共同保留 `blog.xuningtan.com`。不要手工修改
 `dist/public`，因为该目录每次构建都会重建。
