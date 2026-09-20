@@ -1,13 +1,21 @@
-use std::collections::HashSet;
-use std::fmt::Write as _;
 use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
+#[cfg(not(target_arch = "wasm32"))]
+use std::collections::HashSet;
+#[cfg(not(target_arch = "wasm32"))]
+use std::fmt::Write as _;
+#[cfg(not(target_arch = "wasm32"))]
 use thiserror::Error;
+#[cfg(not(target_arch = "wasm32"))]
 use url::Url;
 
+#[cfg(not(target_arch = "wasm32"))]
 const SITE_TOML: &str = include_str!("../config/site.toml");
+#[cfg(target_arch = "wasm32")]
+const SITE_JSON: &str = include_str!(concat!(env!("OUT_DIR"), "/site.json"));
 
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, Error)]
 pub enum ConfigError {
     #[error("failed to parse site configuration: {0}")]
@@ -45,36 +53,9 @@ pub struct SiteMetaConfig {
     pub social_image_alt: String,
     pub social_card: String,
     pub robots: String,
+    pub google_site_verification: String,
     pub skip_to_content_label: String,
-    pub default_theme: ThemeChoice,
-    pub theme_storage_key: String,
     pub base_path: String,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum ThemeChoice {
-    System,
-    Light,
-    Dark,
-}
-
-impl ThemeChoice {
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::System => "system",
-            Self::Light => "light",
-            Self::Dark => "dark",
-        }
-    }
-
-    #[must_use]
-    pub const fn toggled(self) -> Self {
-        match self {
-            Self::Dark => Self::Light,
-            Self::System | Self::Light => Self::Dark,
-        }
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -86,7 +67,6 @@ pub struct NavbarConfig {
     pub cv_label: String,
     pub cv_url: String,
     pub show_cv: bool,
-    pub theme_toggle_label: String,
     pub mobile_menu_open_label: String,
     pub mobile_menu_close_label: String,
     pub links: Vec<NavLink>,
@@ -110,6 +90,8 @@ pub struct HeroConfig {
     pub location: String,
     pub company: String,
     pub bio: String,
+    #[serde(default)]
+    pub bio_italic_phrases: Vec<String>,
     pub image_url: String,
     pub image_alt: String,
     pub interests_title: String,
@@ -140,6 +122,7 @@ pub struct HeroSocialLink {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct NewsConfig {
+    pub enabled: bool,
     pub anchor: String,
     pub heading: String,
     pub items: Vec<NewsItem>,
@@ -154,6 +137,15 @@ pub struct NewsItem {
     pub title: String,
     pub description: String,
     pub tag: String,
+    #[serde(default)]
+    pub links: Vec<NewsItemLink>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct NewsItemLink {
+    pub text: String,
+    pub url: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -169,6 +161,7 @@ pub struct TagStyle {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PublicationsConfig {
+    pub enabled: bool,
     pub anchor: String,
     pub heading: String,
     pub subtitle: String,
@@ -182,7 +175,9 @@ pub struct PublicationsConfig {
     pub pdf_label: String,
     pub code_label: String,
     pub highlight_author: String,
+    #[serde(default)]
     pub stats: Vec<PublicationStat>,
+    #[serde(default)]
     pub items: Vec<PublicationItem>,
 }
 
@@ -212,9 +207,11 @@ pub struct PublicationItem {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TeachingConfig {
+    pub enabled: bool,
     pub anchor: String,
     pub heading: String,
     pub semester_prefix: String,
+    #[serde(default)]
     pub items: Vec<TeachingItem>,
 }
 
@@ -232,20 +229,25 @@ pub struct TeachingItem {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ActivityConfig {
+    pub enabled: bool,
     pub anchor: String,
     pub heading: String,
+    pub vibe_badge_url: String,
+    pub vibe_profile_url: String,
+    pub vibe_badge_alt: String,
+    pub github_username: String,
+    pub profile_url: String,
+    pub api_url: String,
+    pub profile_label: String,
+    pub loading_label: String,
+    pub error_label: String,
+    pub total_label: String,
     pub less_label: String,
     pub more_label: String,
-    pub level_title_prefix: String,
     pub weeks: u8,
     pub days: u8,
     pub months: Vec<String>,
     pub day_labels: Vec<String>,
-    pub seed_week_multiplier: u32,
-    pub seed_day_multiplier: u32,
-    pub seed_cross_multiplier: u32,
-    pub seed_offset: u32,
-    pub level_thresholds: [u8; 4],
     pub level_colors: Vec<ActivityColor>,
 }
 
@@ -292,9 +294,25 @@ pub struct FooterConfig {
     pub owner: String,
     pub powered_by: String,
     pub hosted_by: String,
+    pub technologies: Vec<FooterTechnologyConfig>,
     pub year_mode: FooterYearMode,
     pub fixed_year: i32,
     pub text_template: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FooterTechnologyConfig {
+    pub name: String,
+    pub icon: FooterTechnologyIcon,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum FooterTechnologyIcon {
+    Rust,
+    Vue,
+    Dioxus,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -349,6 +367,7 @@ impl SiteConfig {
     ///
     /// Returns [`ConfigError::Parse`] for malformed TOML and
     /// [`ConfigError::Validation`] when a cross-field invariant fails.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn from_toml(source: &str) -> Result<Self, ConfigError> {
         let config: Self = toml::from_str(source)?;
         config.validate()?;
@@ -360,6 +379,7 @@ impl SiteConfig {
     /// # Errors
     ///
     /// Returns [`ConfigError::Validation`] with all discovered issues.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn validate(&self) -> Result<(), ConfigError> {
         let mut issues = Vec::new();
 
@@ -382,6 +402,7 @@ impl SiteConfig {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn anchor_ids(&self) -> [&str; 6] {
         [
             &self.hero.anchor,
@@ -393,11 +414,15 @@ impl SiteConfig {
         ]
     }
 
-    pub fn footer_text(&self, build_year: i32) -> String {
-        let year = match self.footer.year_mode {
+    pub fn footer_year(&self, build_year: i32) -> i32 {
+        match self.footer.year_mode {
             FooterYearMode::Build => build_year,
             FooterYearMode::Fixed => self.footer.fixed_year,
-        };
+        }
+    }
+
+    pub fn footer_text(&self, build_year: i32) -> String {
+        let year = self.footer_year(build_year);
 
         self.footer
             .text_template
@@ -407,6 +432,7 @@ impl SiteConfig {
             .replace("{hosted_by}", &self.footer.hosted_by)
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn validate_required_strings(&self, issues: &mut Vec<String>) {
         let fields = [
             ("site.title", self.site.title.as_str()),
@@ -416,12 +442,12 @@ impl SiteConfig {
             ("site.social_card", self.site.social_card.as_str()),
             ("site.robots", self.site.robots.as_str()),
             (
-                "site.skip_to_content_label",
-                self.site.skip_to_content_label.as_str(),
+                "site.google_site_verification",
+                self.site.google_site_verification.as_str(),
             ),
             (
-                "site.theme_storage_key",
-                self.site.theme_storage_key.as_str(),
+                "site.skip_to_content_label",
+                self.site.skip_to_content_label.as_str(),
             ),
             (
                 "navbar.primary_navigation_label",
@@ -436,6 +462,24 @@ impl SiteConfig {
             ("publications.heading", self.publications.heading.as_str()),
             ("teaching.heading", self.teaching.heading.as_str()),
             ("activity.heading", self.activity.heading.as_str()),
+            (
+                "activity.vibe_badge_alt",
+                self.activity.vibe_badge_alt.as_str(),
+            ),
+            (
+                "activity.github_username",
+                self.activity.github_username.as_str(),
+            ),
+            (
+                "activity.profile_label",
+                self.activity.profile_label.as_str(),
+            ),
+            (
+                "activity.loading_label",
+                self.activity.loading_label.as_str(),
+            ),
+            ("activity.error_label", self.activity.error_label.as_str()),
+            ("activity.total_label", self.activity.total_label.as_str()),
             ("footer.text_template", self.footer.text_template.as_str()),
         ];
 
@@ -444,8 +488,53 @@ impl SiteConfig {
                 issues.push(format!("{field} must not be empty"));
             }
         }
+
+        for (index, technology) in self.footer.technologies.iter().enumerate() {
+            if technology.name.trim().is_empty() {
+                issues.push(format!(
+                    "footer.technologies[{index}].name must not be empty"
+                ));
+            }
+        }
+
+        let mut italic_phrases = HashSet::new();
+        for (index, phrase) in self.hero.bio_italic_phrases.iter().enumerate() {
+            if phrase.trim().is_empty() {
+                issues.push(format!(
+                    "hero.bio_italic_phrases[{index}] must not be empty"
+                ));
+            } else if !italic_phrases.insert(phrase) {
+                issues.push(format!(
+                    "hero.bio_italic_phrases contains duplicate phrase `{phrase}`"
+                ));
+            } else if !self.hero.bio.contains(phrase) {
+                issues.push(format!(
+                    "hero.bio_italic_phrases[{index}] is not present in hero.bio"
+                ));
+            }
+        }
+
+        for (item_index, item) in self.news.items.iter().enumerate() {
+            let mut link_texts = HashSet::new();
+            for (link_index, link) in item.links.iter().enumerate() {
+                let field = format!("news.items[{item_index}].links[{link_index}].text");
+                if link.text.trim().is_empty() {
+                    issues.push(format!("{field} must not be empty"));
+                } else if !link_texts.insert(link.text.clone()) {
+                    issues.push(format!(
+                        "news.items[{item_index}].links contains duplicate text `{}`",
+                        link.text
+                    ));
+                } else if !item.description.contains(&link.text) {
+                    issues.push(format!(
+                        "{field} is not present in news.items[{item_index}].description"
+                    ));
+                }
+            }
+        }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn validate_anchors(&self, issues: &mut Vec<String>) {
         let anchors = self.anchor_ids();
         let mut unique = HashSet::new();
@@ -474,6 +563,7 @@ impl SiteConfig {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn validate_urls(&self, issues: &mut Vec<String>) {
         validate_external_url(
             "site.canonical_url",
@@ -491,6 +581,36 @@ impl SiteConfig {
         validate_link("navbar.brand_url", &self.navbar.brand_url, true, issues);
         validate_link("navbar.cv_url", &self.navbar.cv_url, true, issues);
         validate_link("hero.image_url", &self.hero.image_url, false, issues);
+        validate_external_url(
+            "activity.vibe_badge_url",
+            &self.activity.vibe_badge_url,
+            false,
+            issues,
+        );
+        validate_external_url(
+            "activity.vibe_profile_url",
+            &self.activity.vibe_profile_url,
+            false,
+            issues,
+        );
+        validate_external_url(
+            "activity.profile_url",
+            &self.activity.profile_url,
+            false,
+            issues,
+        );
+        validate_external_url("activity.api_url", &self.activity.api_url, false, issues);
+
+        for (item_index, item) in self.news.items.iter().enumerate() {
+            for (link_index, link) in item.links.iter().enumerate() {
+                validate_external_url(
+                    &format!("news.items[{item_index}].links[{link_index}].url"),
+                    &link.url,
+                    false,
+                    issues,
+                );
+            }
+        }
 
         for (index, link) in self.navbar.links.iter().enumerate() {
             validate_link(
@@ -538,6 +658,7 @@ impl SiteConfig {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn validate_identifiers(&self, issues: &mut Vec<String>) {
         validate_unique_ids(
             "news.items",
@@ -571,6 +692,7 @@ impl SiteConfig {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn validate_ranges(&self, issues: &mut Vec<String>) {
         if !(-23..=23).contains(&self.hero.timezone_offset_hours) {
             issues.push("hero.timezone_offset_hours must be between -23 and 23".to_owned());
@@ -596,14 +718,6 @@ impl SiteConfig {
         if self.activity.day_labels.is_empty() {
             issues.push("activity.day_labels must not be empty".to_owned());
         }
-        if !self
-            .activity
-            .level_thresholds
-            .windows(2)
-            .all(|pair| pair[0] < pair[1])
-        {
-            issues.push("activity.level_thresholds must be strictly increasing".to_owned());
-        }
         if self.activity.level_colors.len() != 5 {
             issues.push("activity.level_colors must contain exactly five levels".to_owned());
         }
@@ -615,6 +729,7 @@ impl SiteConfig {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn validate_animation_ranges(&self, issues: &mut Vec<String>) {
         let durations = [
             (
@@ -683,6 +798,7 @@ impl SiteConfig {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn validate_footer_template(&self, issues: &mut Vec<String>) {
         const REQUIRED: [&str; 4] = ["year", "owner", "powered_by", "hosted_by"];
         let placeholders = template_placeholders(&self.footer.text_template);
@@ -713,7 +829,14 @@ impl SiteConfig {
 pub fn site_config() -> &'static SiteConfig {
     static CONFIG: OnceLock<SiteConfig> = OnceLock::new();
     CONFIG.get_or_init(|| {
-        SiteConfig::from_toml(SITE_TOML).expect("embedded config/site.toml must be valid")
+        #[cfg(target_arch = "wasm32")]
+        {
+            serde_json::from_str(SITE_JSON).expect("build-generated site.json must be valid")
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            SiteConfig::from_toml(SITE_TOML).expect("embedded config/site.toml must be valid")
+        }
     })
 }
 
@@ -730,6 +853,7 @@ pub fn join_base_path(base_path: &str, path: &str) -> String {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn validate_unique_ids<'a>(
     field: &str,
     ids: impl Iterator<Item = &'a str>,
@@ -745,12 +869,14 @@ fn validate_unique_ids<'a>(
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn validate_optional_link(field: &str, value: &str, issues: &mut Vec<String>) {
     if !value.is_empty() {
         validate_link(field, value, true, issues);
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn validate_link(field: &str, value: &str, allow_fragment: bool, issues: &mut Vec<String>) {
     if value.starts_with('/') || (allow_fragment && value.starts_with('#')) {
         return;
@@ -758,6 +884,7 @@ fn validate_link(field: &str, value: &str, allow_fragment: bool, issues: &mut Ve
     validate_external_url(field, value, true, issues);
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn validate_external_url(field: &str, value: &str, allow_mailto: bool, issues: &mut Vec<String>) {
     let allowed = if allow_mailto {
         ["http", "https", "mailto"].as_slice()
@@ -771,6 +898,7 @@ fn validate_external_url(field: &str, value: &str, allow_mailto: bool, issues: &
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn template_placeholders(template: &str) -> HashSet<&str> {
     let mut placeholders = HashSet::new();
     let mut remainder = template;
@@ -798,9 +926,11 @@ mod tests {
     #[test]
     fn production_configuration_is_valid() {
         let config = SiteConfig::from_toml(production_source()).expect("production config");
-        assert!(!config.hero.first_name.is_empty());
-        assert_eq!(config.publications.items.len(), 3);
-        assert_eq!(config.teaching.items.len(), 4);
+        assert_eq!(config.hero.first_name, "Xuning");
+        assert_eq!(config.news.items.len(), 4);
+        assert!(config.publications.items.is_empty());
+        assert!(config.teaching.items.is_empty());
+        assert!(!config.teaching.enabled);
     }
 
     #[test]
@@ -822,6 +952,20 @@ mod tests {
     }
 
     #[test]
+    fn biography_italic_phrases_must_exist_in_the_biography() {
+        let source = production_source().replace(
+            "bio_italic_phrases = [\"The Chinese University of Hong Kong, Shenzhen (CUHK-Shenzhen)\"",
+            "bio_italic_phrases = [\"Missing Institution\"",
+        );
+        let error = SiteConfig::from_toml(&source).expect_err("missing phrase must fail");
+        assert!(
+            error
+                .to_string()
+                .contains("hero.bio_italic_phrases[0] is not present in hero.bio")
+        );
+    }
+
+    #[test]
     fn duplicate_ids_are_rejected() {
         let source = production_source().replace("id = \"2\"\ndate", "id = \"1\"\ndate");
         let error = SiteConfig::from_toml(&source).expect_err("duplicate id must fail");
@@ -834,7 +978,7 @@ mod tests {
 
     #[test]
     fn unknown_navigation_anchor_is_rejected() {
-        let source = production_source().replace("href = \"#news\"", "href = \"#missing\"");
+        let source = production_source().replace("href = \"#experience\"", "href = \"#missing\"");
         let error = SiteConfig::from_toml(&source).expect_err("unknown anchor must fail");
         assert!(
             error
@@ -846,21 +990,21 @@ mod tests {
     #[test]
     fn duplicate_section_anchors_are_rejected() {
         let source = production_source().replace(
-            "[publications]\nanchor = \"publications\"",
-            "[publications]\nanchor = \"news\"",
+            "[publications]\nenabled = false\nanchor = \"publications\"",
+            "[publications]\nenabled = false\nanchor = \"experience\"",
         );
         let error = SiteConfig::from_toml(&source).expect_err("duplicate anchor must fail");
         assert!(
             error
                 .to_string()
-                .contains("duplicate section anchor `news`")
+                .contains("duplicate section anchor `experience`")
         );
     }
 
     #[test]
     fn invalid_url_scheme_is_rejected() {
         let source = production_source().replace(
-            "canonical_url = \"https://example.com/\"",
+            "canonical_url = \"https://a1pine.github.io/\"",
             "canonical_url = \"javascript:alert(1)\"",
         );
         let error = SiteConfig::from_toml(&source).expect_err("invalid URL must fail");
@@ -881,7 +1025,7 @@ mod tests {
 
     #[test]
     fn invalid_activity_dimensions_are_rejected() {
-        let source = production_source().replace("weeks = 52", "weeks = 0");
+        let source = production_source().replace("weeks = 53", "weeks = 0");
         let error = SiteConfig::from_toml(&source).expect_err("grid dimension must fail");
         assert!(
             error
@@ -908,10 +1052,17 @@ mod tests {
         assert_eq!(
             config.footer_text(2034),
             format!(
-                "© Copyright 2034 {}. Powered by {}. Hosted by {}.",
-                config.footer.owner, config.footer.powered_by, config.footer.hosted_by
+                "© Copyright {} {}. Powered by {}. Hosted with {}.",
+                config.footer.fixed_year,
+                config.footer.owner,
+                config.footer.powered_by,
+                config.footer.hosted_by
             )
         );
+
+        let mut build_year = config.clone();
+        build_year.footer.year_mode = FooterYearMode::Build;
+        assert!(build_year.footer_text(2034).contains("Copyright 2034"));
 
         let source = production_source().replace("{hosted_by}", "{mystery}");
         let error = SiteConfig::from_toml(&source).expect_err("placeholder must fail");
@@ -923,6 +1074,13 @@ mod tests {
     }
 
     #[test]
+    fn unknown_footer_technology_icon_is_rejected() {
+        let source = production_source().replace("icon = \"rust\"", "icon = \"react\"");
+        let error = SiteConfig::from_toml(&source).expect_err("unknown footer icon must fail");
+        assert!(error.to_string().contains("unknown variant `react`"));
+    }
+
+    #[test]
     fn base_path_joining_is_deterministic() {
         assert_eq!(join_base_path("", "/assets/main.css"), "/assets/main.css");
         assert_eq!(
@@ -930,12 +1088,5 @@ mod tests {
             "/arcademic-rust/assets/main.css"
         );
         assert_eq!(join_base_path("arcademic-rust", ""), "/arcademic-rust/");
-    }
-
-    #[test]
-    fn theme_toggle_has_a_deterministic_initial_transition() {
-        assert_eq!(ThemeChoice::System.toggled(), ThemeChoice::Dark);
-        assert_eq!(ThemeChoice::Light.toggled(), ThemeChoice::Dark);
-        assert_eq!(ThemeChoice::Dark.toggled(), ThemeChoice::Light);
     }
 }

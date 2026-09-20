@@ -116,6 +116,10 @@ date = "2026–Present"
 title = "CUHK-Shenzhen & Shenzhen Loop Area Institute (SLAI)"
 description = "PhD student in Computer and Information Engineering, advised by Prof. Junhua Zhao and Prof. Jianwei Huang."
 tag = "Education"
+links = [
+  { text = "Prof. Junhua Zhao", url = "https://www.zhaojunhua.org/" },
+  { text = "Prof. Jianwei Huang", url = "https://jianwei.cuhk.edu.cn/" },
+]
 
 [[news.tag_styles]]
 name = "Education"

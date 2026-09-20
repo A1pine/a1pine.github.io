@@ -35,6 +35,7 @@ struct AlternateHero {
     location: String,
     company: String,
     bio: String,
+    bio_italic_phrases: Vec<String>,
     image_alt: String,
     interests: Vec<String>,
 }
@@ -53,6 +54,7 @@ struct AlternateFooter {
 
 #[component]
 fn ConfiguredPage(config: &'static SiteConfig) -> Element {
+    let footer_year = config.footer_year(config.footer.fixed_year);
     let footer_text = config.footer_text(config.footer.fixed_year);
     rsx! {
         p { {config.site.title.clone()} }
@@ -62,7 +64,7 @@ fn ConfiguredPage(config: &'static SiteConfig) -> Element {
         Research { config: &config.publications, animation: &config.animation }
         Teaching { config: &config.teaching, animation: &config.animation }
         Activity { config: &config.activity, animation: &config.animation }
-        Footer { config: &config.footer, text: footer_text }
+        Footer { config: &config.footer, text: footer_text, year: footer_year }
     }
 }
 
@@ -73,8 +75,7 @@ fn alternate_fixture_replaces_the_production_identity_and_content() {
         production.navbar.brand.clone(),
         production.hero.company.clone(),
         production.news.items[0].title.clone(),
-        production.publications.items[0].title.clone(),
-        production.teaching.items[0].title.clone(),
+        production.activity.vibe_profile_url.clone(),
         production.footer.owner.clone(),
     ];
     let fixture: AlternateFixture =
@@ -111,6 +112,7 @@ fn apply_fixture(config: &mut SiteConfig, fixture: AlternateFixture) {
     config.hero.location = fixture.hero.location;
     config.hero.company = fixture.hero.company;
     config.hero.bio = fixture.hero.bio;
+    config.hero.bio_italic_phrases = fixture.hero.bio_italic_phrases;
     config.hero.image_alt = fixture.hero.image_alt;
     for (interest, replacement) in config.hero.interests.iter_mut().zip(fixture.hero.interests) {
         interest.name = replacement;
@@ -126,6 +128,7 @@ fn apply_fixture(config: &mut SiteConfig, fixture: AlternateFixture) {
         item.date = format!("Note {index}");
         item.title = format!("Archive update {index}");
         item.description = format!("Alternate archive description {index}.");
+        item.links.clear();
     }
 
     config.publications.heading = fixture.publications.heading;
@@ -146,7 +149,11 @@ fn apply_fixture(config: &mut SiteConfig, fixture: AlternateFixture) {
     }
 
     config.activity.heading = fixture.activity.heading;
+    "https://example.org/archive/vibe-badge.svg".clone_into(&mut config.activity.vibe_badge_url);
+    "https://example.org/archive/vibe".clone_into(&mut config.activity.vibe_profile_url);
+    "Archive VibeUsage".clone_into(&mut config.activity.vibe_badge_alt);
     config.footer.owner = fixture.footer.owner;
     config.footer.powered_by = fixture.footer.powered_by;
     config.footer.hosted_by = fixture.footer.hosted_by;
+    config.footer.technologies.clear();
 }
