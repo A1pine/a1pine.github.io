@@ -64,6 +64,11 @@ jobs:
             base_path="${{ github.event.repository.name }}"
           fi
           echo "base-path=${base_path}" >> "$GITHUB_OUTPUT"
+          if [[ -z "${base_path}" ]]; then
+            echo "base-url=http://127.0.0.1:3200/" >> "$GITHUB_OUTPUT"
+          else
+            echo "base-url=http://127.0.0.1:3200/${base_path}/" >> "$GITHUB_OUTPUT"
+          fi
           scripts/build-pages.sh "$base_path" release
 
       - name: Prepare Pages artifact
@@ -73,7 +78,7 @@ jobs:
 
       - name: Verify release artifact in browsers
         env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3200/${{ steps.pages.outputs.base-path }}/
+          PLAYWRIGHT_BASE_URL: ${{ steps.pages.outputs.base-url }}
         run: |
           node scripts/serve-pages.mjs dist/public 3200 "${{ steps.pages.outputs.base-path }}" &
           curl --fail --retry 20 --retry-delay 1 --retry-connrefused "$PLAYWRIGHT_BASE_URL"
