@@ -1,35 +1,51 @@
+use dioxus::prelude::WritableExt as _;
 use dioxus::prelude::*;
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdMenu, LdMoon, LdSun, LdX},
+    icons::ld_icons::{LdMenu, LdX},
 };
 
-use crate::components::persist_theme;
-use crate::config::{NavbarConfig, ThemeChoice};
+use crate::config::NavbarConfig;
+use crate::localization::{Locale, select_locale, translate, use_locale};
 
 #[component]
 pub fn Navbar(
     config: &'static NavbarConfig,
-    mut theme: Signal<ThemeChoice>,
-    scroll_y: Signal<f64>,
+    scroll_top_visible: Signal<bool>,
+    scroll_top_threshold: u32,
 ) -> Element {
     let mut mobile_open = use_signal(|| false);
+    let locale = use_locale();
+    let locale_signal = try_consume_context::<Signal<Locale>>();
+    let language_toggle_label = translate(locale, "navbar.language_toggle", "Switch language");
+    let chinese_label = translate(locale, "navbar.language_chinese", "中文");
+    let english_label = translate(locale, "navbar.language_english", "English");
+    let primary_navigation_label = translate(
+        locale,
+        "navbar.primary_navigation",
+        &config.primary_navigation_label,
+    );
+    let brand = translate(locale, "navbar.brand", &config.brand);
+    let cv_label = translate(locale, "navbar.cv", &config.cv_label);
+    let mobile_open_label = translate(locale, "navbar.mobile_open", &config.mobile_menu_open_label);
+    let mobile_close_label = translate(
+        locale,
+        "navbar.mobile_close",
+        &config.mobile_menu_close_label,
+    );
 
     #[cfg(target_arch = "wasm32")]
-    let _scroll_tracker =
-        use_hook(move || std::rc::Rc::new(web_trackers::ScrollTracker::install(scroll_y)));
-
-    let is_dark = theme() == ThemeChoice::Dark;
-    let toggle_theme = move |_| {
-        let next = theme().toggled();
-        theme.set(next);
-        persist_theme(&crate::config::site_config().site.theme_storage_key, next);
-    };
+    let _scroll_tracker = use_hook(move || {
+        std::rc::Rc::new(web_trackers::ScrollTracker::install(
+            scroll_top_visible,
+            scroll_top_threshold,
+        ))
+    });
 
     rsx! {
         nav {
             class: "navbar",
-            aria_label: config.primary_navigation_label.clone(),
+            aria_label: primary_navigation_label,
             onkeydown: move |event| {
                 if event.key() == Key::Escape && mobile_open() {
                     mobile_open.set(false);
@@ -38,24 +54,13 @@ pub fn Navbar(
             },
             div { class: "nav-container",
                 div { class: "nav-row",
-                    a { class: "brand", href: config.brand_url.clone(), {config.brand.clone()} }
+                    a { class: "brand", href: config.brand_url.clone(), {brand.clone()} }
 
                     div { class: "desktop-nav",
                         for link in &config.links {
                             a { class: "nav-link", href: link.href.clone(),
-                                {link.name.clone()}
+                                {translate(locale, navigation_key(&link.href), &link.name)}
                                 span { class: "nav-link-underline", aria_hidden: "true" }
-                            }
-                        }
-                        button {
-                            class: "icon-button theme-toggle",
-                            r#type: "button",
-                            aria_label: config.theme_toggle_label.clone(),
-                            onclick: toggle_theme,
-                            if is_dark {
-                                Icon { icon: LdSun, width: 20, height: 20, class: "nav-icon" }
-                            } else {
-                                Icon { icon: LdMoon, width: 20, height: 20, class: "nav-icon" }
                             }
                         }
                         if config.show_cv {
@@ -66,38 +71,63 @@ pub fn Navbar(
                                         span { class: "cv-particle", "data-particle": "{index}" }
                                     }
                                 }
-                                span { class: "cv-label", {config.cv_label.clone()} }
+                                span { class: "cv-label", {cv_label.clone()} }
                             }
                         }
                     }
 
-                    div { class: "mobile-controls",
-                        button {
-                            class: "icon-button theme-toggle",
-                            r#type: "button",
-                            aria_label: config.theme_toggle_label.clone(),
-                            onclick: toggle_theme,
-                            if is_dark {
-                                Icon { icon: LdSun, width: 20, height: 20, class: "nav-icon" }
-                            } else {
-                                Icon { icon: LdMoon, width: 20, height: 20, class: "nav-icon" }
+                    div { class: "nav-actions",
+                        div { class: "language-toggle", role: "group", aria_label: language_toggle_label,
+                            button {
+                                class: if locale == Locale::ChineseSimplified {
+                                    "language-option is-active"
+                                } else {
+                                    "language-option"
+                                },
+                                r#type: "button",
+                                aria_label: chinese_label,
+                                "aria-pressed": (locale == Locale::ChineseSimplified).to_string(),
+                                onclick: move |_| {
+                                    if let Some(signal) = locale_signal {
+                                        select_locale(signal, Locale::ChineseSimplified);
+                                    }
+                                },
+                                "中"
+                            }
+                            button {
+                                class: if locale == Locale::English {
+                                    "language-option is-active"
+                                } else {
+                                    "language-option"
+                                },
+                                r#type: "button",
+                                aria_label: english_label,
+                                "aria-pressed": (locale == Locale::English).to_string(),
+                                onclick: move |_| {
+                                    if let Some(signal) = locale_signal {
+                                        select_locale(signal, Locale::English);
+                                    }
+                                },
+                                "EN"
                             }
                         }
-                        button {
-                            id: "mobile-menu-button",
-                            class: "menu-button",
-                            r#type: "button",
-                            aria_label: if mobile_open() {
-                                config.mobile_menu_close_label.clone()
-                            } else {
-                                config.mobile_menu_open_label.clone()
-                            },
-                            "aria-expanded": mobile_open().to_string(),
-                            onclick: move |_| mobile_open.toggle(),
-                            if mobile_open() {
-                                Icon { icon: LdX, width: 24, height: 24, class: "nav-icon" }
-                            } else {
-                                Icon { icon: LdMenu, width: 24, height: 24, class: "nav-icon" }
+                        div { class: "mobile-controls",
+                            button {
+                                id: "mobile-menu-button",
+                                class: "menu-button",
+                                r#type: "button",
+                                aria_label: if mobile_open() {
+                                    mobile_close_label.clone()
+                                } else {
+                                    mobile_open_label.clone()
+                                },
+                                "aria-expanded": mobile_open().to_string(),
+                                onclick: move |_| mobile_open.toggle(),
+                                if mobile_open() {
+                                    Icon { icon: LdX, width: 24, height: 24, class: "nav-icon" }
+                                } else {
+                                    Icon { icon: LdMenu, width: 24, height: 24, class: "nav-icon" }
+                                }
                             }
                         }
                     }
@@ -114,13 +144,23 @@ pub fn Navbar(
                                 class: "mobile-nav-link",
                                 href: link.href.clone(),
                                 onclick: move |_| mobile_open.set(false),
-                                {link.name.clone()}
+                                {translate(locale, navigation_key(&link.href), &link.name)}
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+fn navigation_key(href: &str) -> &'static str {
+    match href {
+        "#home" => "navbar.home",
+        "#about" => "navbar.about",
+        "#experience" => "navbar.experience",
+        "#activity" => "navbar.activity",
+        _ => "navbar.unknown",
     }
 }
 
@@ -149,7 +189,7 @@ mod web_trackers {
     use wasm_bindgen::{JsCast, closure::Closure};
     use web_sys::{AddEventListenerOptions, Event, HtmlElement};
 
-    use crate::components::model::scroll_progress;
+    use crate::components::model::{scroll_progress, should_show_scroll_to_top};
 
     pub struct ScrollTracker {
         window: web_sys::Window,
@@ -159,7 +199,10 @@ mod web_trackers {
     }
 
     impl ScrollTracker {
-        pub fn install(mut scroll_y: dioxus::prelude::Signal<f64>) -> Option<Self> {
+        pub fn install(
+            mut scroll_top_visible: dioxus::prelude::Signal<bool>,
+            threshold: u32,
+        ) -> Option<Self> {
             let window = web_sys::window()?;
             let root = window
                 .document()?
@@ -167,15 +210,24 @@ mod web_trackers {
                 .dyn_into::<HtmlElement>()
                 .ok()?;
             let frame = Rc::new(Cell::new(0));
+            let initial_scroll = apply_scroll_progress(&window, &root);
+            let initial_visible = should_show_scroll_to_top(initial_scroll, threshold);
+            let last_visible = Rc::new(Cell::new(initial_visible));
 
-            scroll_y.set(apply_scroll_progress(&window, &root));
+            scroll_top_visible.set(initial_visible);
 
             let callback_window = window.clone();
             let callback_root = root;
             let callback_frame = Rc::clone(&frame);
+            let callback_visible = Rc::clone(&last_visible);
             let animation_callback = Closure::wrap(Box::new(move |_timestamp: f64| {
                 callback_frame.set(0);
-                scroll_y.set(apply_scroll_progress(&callback_window, &callback_root));
+                let scroll_y = apply_scroll_progress(&callback_window, &callback_root);
+                let visible = should_show_scroll_to_top(scroll_y, threshold);
+                if visible != callback_visible.get() {
+                    callback_visible.set(visible);
+                    scroll_top_visible.set(visible);
+                }
             }) as Box<dyn FnMut(f64)>);
             let animation_function = animation_callback
                 .as_ref()

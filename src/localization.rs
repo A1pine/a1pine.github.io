@@ -1,9 +1,7 @@
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
-#[cfg(target_arch = "wasm32")]
-use dioxus::prelude::WritableExt;
-use dioxus::prelude::{Signal, try_consume_context};
+use dioxus::prelude::{Signal, WritableExt as _, try_consume_context};
 
 const ZH_CN_JSON: &str = include_str!("../config/locales/zh-CN.json");
 
@@ -17,6 +15,9 @@ pub const REQUIRED_ZH_CN_KEYS: &[&str] = &[
     "navbar.cv",
     "navbar.mobile_open",
     "navbar.mobile_close",
+    "navbar.language_toggle",
+    "navbar.language_chinese",
+    "navbar.language_english",
     "navbar.home",
     "navbar.about",
     "navbar.experience",
@@ -134,6 +135,8 @@ pub fn use_locale() -> Locale {
     try_consume_context::<Signal<Locale>>().map_or(Locale::English, |locale| locale())
 }
 
+pub const LOCALE_STORAGE_KEY: &str = "arcademic-locale";
+
 pub fn translate(locale: Locale, key: &str, fallback: &str) -> String {
     match locale {
         Locale::English => fallback.to_owned(),
@@ -198,16 +201,61 @@ impl Drop for SystemLanguageTracker {
 
 #[cfg(target_arch = "wasm32")]
 pub fn apply_browser_locale(mut locale: Signal<Locale>) {
-    let next = browser_locale();
+    let next = stored_locale().unwrap_or_else(browser_locale);
     if locale() != next {
         locale.set(next);
     }
+    apply_locale_attributes(next);
+}
+
+pub fn select_locale(mut locale: Signal<Locale>, next: Locale) {
+    if locale() != next {
+        locale.set(next);
+    }
+    #[cfg(target_arch = "wasm32")]
+    store_locale(next);
+    #[cfg(target_arch = "wasm32")]
+    apply_locale_attributes(next);
+}
+
+#[cfg(target_arch = "wasm32")]
+fn apply_locale_attributes(next: Locale) {
     if let Some(root) = web_sys::window()
         .and_then(|window| window.document())
         .and_then(|document| document.document_element())
     {
         let _ = root.set_attribute("lang", next.html_language());
         let _ = root.set_attribute("dir", "ltr");
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn stored_locale() -> Option<Locale> {
+    let value = web_sys::window()?
+        .local_storage()
+        .ok()
+        .flatten()?
+        .get_item(LOCALE_STORAGE_KEY)
+        .ok()
+        .flatten()?;
+
+    match value.as_str() {
+        "zh" => Some(Locale::ChineseSimplified),
+        "en" => Some(Locale::English),
+        _ => None,
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn store_locale(next: Locale) {
+    let value = match next {
+        Locale::English => "en",
+        Locale::ChineseSimplified => "zh",
+    };
+    if let Some(storage) =
+        web_sys::window().and_then(|window| window.local_storage().ok().flatten())
+    {
+        let _ = storage.set_item(LOCALE_STORAGE_KEY, value);
     }
 }
 
