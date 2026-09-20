@@ -49,15 +49,59 @@ function parseVenue(venueLine) {
   return { name: name || trimmed }
 }
 
-const browser = await chromium.launch({ headless: true })
-const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+const browser = await chromium.launch({
+  headless: true,
+  args: ['--disable-blink-features=AutomationControlled'],
+})
+const context = await browser.newContext({
+  viewport: { width: 1280, height: 900 },
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+  locale: 'en-US',
+})
+await context.addCookies([{
+  name: 'SOCS',
+  value: 'CAESEwgDEgk2NzM3OTg2NzUaAmVuIAEaBgiA_LyaBg',
+  domain: '.google.com',
+  path: '/',
+}])
+const page = await context.newPage()
 page.setDefaultTimeout(45_000)
 
-await page.goto(profileUrl, { waitUntil: 'domcontentloaded' })
-if ((await page.title()).toLowerCase().includes('not a robot')) {
-  throw new Error('Google Scholar returned a CAPTCHA; retry later')
+async function loadProfile(attempt) {
+  await page.goto(profileUrl, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60_000,
+  })
+  if (page.url().includes('consent.google.com')) {
+    const accept = page.getByRole('button', { name: /accept all|i agree|同意/i }).first()
+    if (await accept.count()) {
+      await accept.click()
+      await page.waitForLoadState('domcontentloaded')
+    } else {
+      await page.locator('form[action*="consent"]').first().submit()
+      await page.waitForLoadState('domcontentloaded')
+    }
+  }
+  console.log(`attempt ${attempt}: ${page.url()} — ${await page.title()}`)
+  await page
+    .locator('#gsc_prf_in, .gsc_a_tr')
+    .first()
+    .waitFor({ state: 'visible', timeout: 30_000 })
 }
-const profileName = await page.locator('#gsc_prf_in').innerText().catch(() => '')
+
+try {
+  await loadProfile(1)
+} catch (error) {
+  console.warn(`first profile load failed: ${error.message}`)
+  await page.waitForTimeout(10_000)
+  try {
+    await loadProfile(2)
+  } catch (retryError) {
+    console.error(`profile body: ${(await page.locator('body').innerText().catch(() => '')).slice(0, 500)}`)
+    throw retryError
+  }
+}
+const profileName = await page.locator('#gsc_prf_in').innerText().catch(() => 'Google Scholar profile')
 if (!profileName) {
   throw new Error(`Google Scholar profile was not found: ${scholarId}`)
 }
