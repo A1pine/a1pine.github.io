@@ -29,6 +29,8 @@ pub const REQUIRED_ZH_CN_KEYS: &[&str] = &[
     "hero.bio_italic.cuhk",
     "hero.bio_italic.slai",
     "hero.bio_italic.netease",
+    "hero.bio_link.1.text",
+    "hero.bio_link.2.text",
     "hero.image_alt",
     "hero.interests_title",
     "hero.available",

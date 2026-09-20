@@ -92,6 +92,8 @@ pub struct HeroConfig {
     pub bio: String,
     #[serde(default)]
     pub bio_italic_phrases: Vec<String>,
+    #[serde(default)]
+    pub bio_links: Vec<HeroBioLink>,
     pub image_url: String,
     pub image_alt: String,
     pub interests_title: String,
@@ -108,6 +110,13 @@ pub struct HeroConfig {
 #[serde(deny_unknown_fields)]
 pub struct HeroInterest {
     pub name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct HeroBioLink {
+    pub text: String,
+    pub url: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -514,6 +523,8 @@ impl SiteConfig {
             }
         }
 
+        self.validate_hero_bio_links(issues);
+
         for (item_index, item) in self.news.items.iter().enumerate() {
             let mut link_texts = HashSet::new();
             for (link_index, link) in item.links.iter().enumerate() {
@@ -530,6 +541,25 @@ impl SiteConfig {
                         "{field} is not present in news.items[{item_index}].description"
                     ));
                 }
+            }
+        }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn validate_hero_bio_links(&self, issues: &mut Vec<String>) {
+        let mut bio_link_texts = HashSet::new();
+        for (index, link) in self.hero.bio_links.iter().enumerate() {
+            if link.text.trim().is_empty() {
+                issues.push(format!("hero.bio_links[{index}].text must not be empty"));
+            } else if !bio_link_texts.insert(link.text.clone()) {
+                issues.push(format!(
+                    "hero.bio_links contains duplicate text `{}`",
+                    link.text
+                ));
+            } else if !self.hero.bio.contains(&link.text) {
+                issues.push(format!(
+                    "hero.bio_links[{index}].text is not present in hero.bio"
+                ));
             }
         }
     }
@@ -626,6 +656,15 @@ impl SiteConfig {
                 &format!("hero.social_links[{index}].url"),
                 &link.url,
                 true,
+                issues,
+            );
+        }
+
+        for (index, link) in self.hero.bio_links.iter().enumerate() {
+            validate_external_url(
+                &format!("hero.bio_links[{index}].url"),
+                &link.url,
+                false,
                 issues,
             );
         }

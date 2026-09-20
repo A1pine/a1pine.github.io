@@ -46,8 +46,12 @@ last_name = "TAN"
 role = "PhD Student • AI for Science and Engineering"
 location = "Shenzhen, China"
 company = "CUHK-Shenzhen & SLAI"
-bio = "Xuning Tan earned his Bachelor of Advanced Computing (Honours) from the Australian National University in 2022. He is currently a PhD student in the joint program between The Chinese University of Hong Kong, Shenzhen (CUHK-Shenzhen) and the Shenzhen Loop Area Institute (SLAI). Before beginning his doctoral studies, he spent three years at NetEase Games in Guangzhou. His research applies artificial intelligence to scientific and engineering problems, with a particular focus on energy systems. His core interests include multi-agent systems, trustworthy and explainable AI, and quantum agents."
+bio = "Xuning Tan earned his Bachelor of Advanced Computing (Honours) from the Australian National University in 2022. He is currently a PhD student in the joint program between The Chinese University of Hong Kong, Shenzhen (CUHK-Shenzhen) and the Shenzhen Loop Area Institute (SLAI), advised by Prof. Junhua Zhao and Prof. Jianwei Huang. Before beginning his doctoral studies, he spent three years at NetEase Games in Guangzhou. His research applies artificial intelligence to scientific and engineering problems, with a particular focus on energy systems. His core interests include multi-agent systems, trustworthy and explainable AI, and quantum agents."
 bio_italic_phrases = ["The Chinese University of Hong Kong, Shenzhen (CUHK-Shenzhen)", "Shenzhen Loop Area Institute (SLAI)", "NetEase Games"]
+bio_links = [
+  { text = "Prof. Junhua Zhao", url = "https://www.zhaojunhua.org/" },
+  { text = "Prof. Jianwei Huang", url = "https://jianwei.cuhk.edu.cn/" },
+]
 image_url = "/assets/profile-photo.jpg"
 image_alt = "Xuning TAN"
 interests_title = "Research Interests"

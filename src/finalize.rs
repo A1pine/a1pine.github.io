@@ -163,6 +163,13 @@ pub fn configured_values(config: &SiteConfig, build_year: i32) -> Vec<String> {
     );
     values.extend(config.hero.interests.iter().map(|item| item.name.clone()));
     values.extend(config.hero.bio_italic_phrases.clone());
+    values.extend(
+        config
+            .hero
+            .bio_links
+            .iter()
+            .flat_map(|link| [link.text.clone(), link.url.clone()]),
+    );
     values.extend(config.hero.social_links.iter().flat_map(|link| {
         [
             link.platform.clone(),

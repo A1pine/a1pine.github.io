@@ -113,6 +113,7 @@ fn apply_fixture(config: &mut SiteConfig, fixture: AlternateFixture) {
     config.hero.company = fixture.hero.company;
     config.hero.bio = fixture.hero.bio;
     config.hero.bio_italic_phrases = fixture.hero.bio_italic_phrases;
+    config.hero.bio_links.clear();
     config.hero.image_alt = fixture.hero.image_alt;
     for (interest, replacement) in config.hero.interests.iter_mut().zip(fixture.hero.interests) {
         interest.name = replacement;
