@@ -113,6 +113,10 @@ pub fn Hero(config: &'static HeroConfig) -> Element {
         .enumerate()
         .map(|(index, link)| (translate(locale, &bio_link_key(index), &link.text), link))
         .collect::<Vec<_>>();
+    let hero_name = translate(locale, "hero.name", "谈旭宁");
+    let mut hero_name_chars = hero_name.chars();
+    let hero_surname = hero_name_chars.next().unwrap_or_default().to_string();
+    let hero_given_name = hero_name_chars.as_str().to_owned();
     let local_profile = config.image_url == "/assets/profile-photo.jpg";
     let image_source = if local_profile {
         PROFILE_PHOTO.to_string()
@@ -161,7 +165,8 @@ pub fn Hero(config: &'static HeroConfig) -> Element {
                     div { id: config.about_anchor.clone(), class: "hero-content entrance-up",
                         h1 { class: "hero-name",
                             if locale == Locale::ChineseSimplified {
-                                span { class: "gradient-name", {translate(locale, "hero.name", "谈旭宁")} }
+                                span { class: "gradient-name", {hero_surname.clone()} }
+                                {hero_given_name.clone()}
                             } else {
                                 {config.first_name.clone()}
                                 " "
