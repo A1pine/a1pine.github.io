@@ -7,7 +7,9 @@ publications 的 `items`、`stats`、`total_value`、`citations_value` 和
 
 ## 数据来源
 
-脚本使用 Playwright 访问 Google Scholar 个人主页，抓取每篇论文的：
+脚本优先通过 SerpAPI 的 Google Scholar Author 接口获取数据；未设置
+`SERPAPI_KEY` 时回退为 Playwright 直接访问 Google Scholar 个人主页（适合本地
+网络，GitHub Actions 的数据中心 IP 会被 Google 拦截）。每次抓取每篇论文的：
 
 - 论文标题
 - 合作者姓名（主页列表截断时会进入论文详情页补全）
@@ -25,7 +27,11 @@ publications 的 `items`、`stats`、`total_value`、`citations_value` 和
 
 ```bash
 gh variable set SCHOLAR_ID --body "<google-scholar-user-id>"
+gh secret set SERPAPI_KEY --body "<serpapi-api-key>"
 ```
+
+SerpAPI 免费套餐每月 100 次调用，足够每日同步。注册地址：
+https://serpapi.com/manage-api-key
 
 抓取成功且数据有变化时，Action 会提交 `config/publications.json` 并推送
 `main`，随后的 Pages workflow 会自动重新构建并上线。

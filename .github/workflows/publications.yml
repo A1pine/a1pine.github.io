@@ -16,6 +16,9 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      SCHOLAR_ID: ${{ vars.SCHOLAR_ID || secrets.SCHOLAR_ID }}
+      SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,11 +31,10 @@ jobs:
         run: npm ci
 
       - name: Install browser
+        if: ${{ env.SERPAPI_KEY == '' }}
         run: npx playwright install --with-deps chromium
 
       - name: Fetch publications from Google Scholar
-        env:
-          SCHOLAR_ID: ${{ vars.SCHOLAR_ID || secrets.SCHOLAR_ID }}
         run: node scripts/fetch-publications.mjs "$SCHOLAR_ID"
 
       - name: Commit updated publications
