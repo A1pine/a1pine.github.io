@@ -265,7 +265,7 @@ test('follows browser language changes without client-side persistence', async (
 
   await expect(page.getByRole('heading', { name: '经历与教育' })).toBeVisible()
   await expect(page.getByRole('heading', { name: '网易游戏，广州' })).toBeVisible()
-  await expect(page.getByText('任职于网易互娱，大话事业部。', { exact: true })).toBeVisible()
+  await expect(page.getByText('任职于网易互娱，大话事业部', { exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: '香港中文大学（深圳）' })).toBeVisible()
   await expect(page.getByRole('heading', {
     name: '港中深 & 深圳河套学院（SLAI）',
@@ -303,6 +303,31 @@ test('follows browser language changes without client-side persistence', async (
     local: localStorage.length,
     session: sessionStorage.length,
   }))).toEqual({ cookies: '', local: 0, session: 0 })
+  await assertRuntime()
+})
+
+test('switches languages manually with a transition and remembers the choice', async ({ page }) => {
+  const assertRuntime = watchRuntime(page)
+  await openSite(page)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+
+  await page.getByRole('button', { name: '中文' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
+  await expect(page.locator('.app-root')).toHaveAttribute('data-locale', 'zh-CN')
+  await expect(page.locator('h1')).toHaveText('谈旭宁')
+  await expect(page.getByRole('heading', { name: '经历与教育' })).toBeVisible()
+  await expect(page.locator('.app-root')).not.toHaveClass(/locale-switching/)
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('arcademic-locale'))).toBe('zh')
+
+  await page.reload({ waitUntil: 'networkidle' })
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
+  await expect(page.locator('h1')).toHaveText('谈旭宁')
+
+  await page.getByRole('button', { name: 'English' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+  await expect(page.locator('h1')).toHaveText('Xuning TAN')
+  await expect(page.locator('.app-root')).not.toHaveClass(/locale-switching/)
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('arcademic-locale'))).toBe('en')
   await assertRuntime()
 })
 

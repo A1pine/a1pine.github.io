@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
 use dioxus::prelude::{Signal, WritableExt as _, try_consume_context};
+#[cfg(target_arch = "wasm32")]
+use gloo_timers::callback::Timeout;
 
 const ZH_CN_JSON: &str = include_str!("../config/locales/zh-CN.json");
 
@@ -209,13 +211,44 @@ pub fn apply_browser_locale(mut locale: Signal<Locale>) {
 }
 
 pub fn select_locale(mut locale: Signal<Locale>, next: Locale) {
-    if locale() != next {
+    if locale() == next {
+        return;
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    {
+        if let Some(root) = locale_switch_root() {
+            let _ = root.class_list().add_1("locale-switching");
+        }
+
+        Timeout::new(150, move || {
+            locale.set(next);
+            store_locale(next);
+            apply_locale_attributes(next);
+
+            Timeout::new(60, move || {
+                if let Some(root) = locale_switch_root() {
+                    let _ = root.class_list().remove_1("locale-switching");
+                }
+            })
+            .forget();
+        })
+        .forget();
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
         locale.set(next);
     }
-    #[cfg(target_arch = "wasm32")]
-    store_locale(next);
-    #[cfg(target_arch = "wasm32")]
-    apply_locale_attributes(next);
+}
+
+#[cfg(target_arch = "wasm32")]
+fn locale_switch_root() -> Option<web_sys::Element> {
+    web_sys::window()?
+        .document()?
+        .query_selector(".app-root")
+        .ok()
+        .flatten()
 }
 
 #[cfg(target_arch = "wasm32")]
