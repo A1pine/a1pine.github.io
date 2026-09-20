@@ -3,6 +3,7 @@ pub mod components;
 pub mod config;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod finalize;
+pub mod localization;
 
 pub use app::App;
 

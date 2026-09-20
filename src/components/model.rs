@@ -1,25 +1,3 @@
-use crate::config::ThemeChoice;
-
-pub fn initialize_theme(
-    configured: ThemeChoice,
-    stored: Option<&str>,
-    prefers_dark: bool,
-) -> ThemeChoice {
-    match stored {
-        Some("dark") => ThemeChoice::Dark,
-        Some("light") => ThemeChoice::Light,
-        _ => resolve_system_theme(configured, prefers_dark),
-    }
-}
-
-const fn resolve_system_theme(configured: ThemeChoice, prefers_dark: bool) -> ThemeChoice {
-    match configured {
-        ThemeChoice::Dark => ThemeChoice::Dark,
-        ThemeChoice::System if prefers_dark => ThemeChoice::Dark,
-        ThemeChoice::Light | ThemeChoice::System => ThemeChoice::Light,
-    }
-}
-
 #[cfg_attr(not(any(target_arch = "wasm32", test)), allow(dead_code))]
 pub fn is_working_hour(utc_hour: i32, offset: i8, start: u8, end: u8) -> bool {
     let local_hour = (utc_hour + i32::from(offset)).rem_euclid(24);
@@ -27,21 +5,11 @@ pub fn is_working_hour(utc_hour: i32, offset: i8, start: u8, end: u8) -> bool {
 }
 
 pub fn unsplash_with_width(source: &str, width: u16) -> String {
-    let Ok(mut url) = url::Url::parse(source) else {
-        return source.to_owned();
-    };
-    if url.host_str() != Some("images.unsplash.com") {
+    if !source.starts_with("https://images.unsplash.com/") {
         return source.to_owned();
     }
-
-    {
-        let mut query = url.query_pairs_mut();
-        query.append_pair("auto", "format");
-        query.append_pair("fit", "crop");
-        query.append_pair("q", "75");
-        query.append_pair("w", &width.to_string());
-    }
-    url.to_string()
+    let separator = if source.contains('?') { '&' } else { '?' };
+    format!("{source}{separator}auto=format&fit=crop&q=75&w={width}")
 }
 
 pub fn image_srcset(source: &str, widths: &[u16]) -> String {
@@ -53,9 +21,12 @@ pub fn image_srcset(source: &str, widths: &[u16]) -> String {
 }
 
 pub fn url_origin(source: &str) -> Option<String> {
-    let url = url::Url::parse(source).ok()?;
-    let host = url.host_str()?;
-    Some(format!("{}://{host}", url.scheme()))
+    let (scheme, remainder) = source.split_once("://")?;
+    if !matches!(scheme, "http" | "https") {
+        return None;
+    }
+    let host = remainder.split('/').next()?.split('?').next()?;
+    (!host.is_empty()).then(|| format!("{scheme}://{host}"))
 }
 
 #[cfg_attr(not(any(target_arch = "wasm32", test)), allow(dead_code))]
@@ -94,25 +65,6 @@ pub fn normalize_counts(counts: &[u16]) -> Vec<f64> {
         .collect()
 }
 
-pub fn activity_level(
-    week: u32,
-    day: u32,
-    week_multiplier: u32,
-    day_multiplier: u32,
-    cross_multiplier: u32,
-    offset: u32,
-    thresholds: [u8; 4],
-) -> u8 {
-    let seed =
-        (week * week_multiplier + day * day_multiplier + week * day * cross_multiplier + offset)
-            % 100;
-    let level = thresholds
-        .iter()
-        .filter(|threshold| seed > u32::from(**threshold))
-        .count();
-    u8::try_from(level).unwrap_or(4)
-}
-
 pub fn is_external_link(url: &str) -> bool {
     url.starts_with("https://") || url.starts_with("http://")
 }
@@ -134,49 +86,14 @@ pub fn publication_action_kind(url: &str) -> PublicationActionKind {
     }
 }
 
+#[cfg_attr(not(any(target_arch = "wasm32", test)), allow(dead_code))]
 pub fn should_show_scroll_to_top(scroll_y: f64, threshold: u32) -> bool {
     scroll_y > f64::from(threshold)
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn persist_theme(storage_key: &str, theme: ThemeChoice) {
-    if let Some(window) = web_sys::window()
-        && let Ok(Some(storage)) = window.local_storage()
-    {
-        let _ = storage.set_item(storage_key, theme.as_str());
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn persist_theme(_storage_key: &str, _theme: ThemeChoice) {}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn theme_initialization_prefers_valid_storage() {
-        assert_eq!(
-            initialize_theme(ThemeChoice::System, Some("dark"), false),
-            ThemeChoice::Dark
-        );
-        assert_eq!(
-            initialize_theme(ThemeChoice::System, Some("light"), true),
-            ThemeChoice::Light
-        );
-    }
-
-    #[test]
-    fn theme_initialization_resolves_system_preference() {
-        assert_eq!(
-            initialize_theme(ThemeChoice::System, None, true),
-            ThemeChoice::Dark
-        );
-        assert_eq!(
-            initialize_theme(ThemeChoice::System, Some("invalid"), false),
-            ThemeChoice::Light
-        );
-    }
 
     #[test]
     fn working_hours_include_start_and_exclude_end() {
@@ -254,27 +171,6 @@ mod tests {
         assert!((normalized[0] - 0.25).abs() < f64::EPSILON);
         assert!((normalized[1] - 0.5).abs() < f64::EPSILON);
         assert!((normalized[2] - 1.0).abs() < f64::EPSILON);
-    }
-
-    #[test]
-    fn activity_level_matches_source_golden_cases() {
-        let thresholds = [20, 40, 60, 80];
-        assert_eq!(activity_level(0, 0, 17, 31, 7, 13, thresholds), 0);
-        assert_eq!(activity_level(1, 0, 17, 31, 7, 13, thresholds), 1);
-        assert_eq!(activity_level(2, 0, 17, 31, 7, 13, thresholds), 2);
-        assert_eq!(activity_level(3, 0, 17, 31, 7, 13, thresholds), 3);
-        assert_eq!(activity_level(4, 0, 17, 31, 7, 13, thresholds), 4);
-    }
-
-    #[test]
-    fn activity_grid_has_expected_size_and_level_range() {
-        let levels = (0..52)
-            .flat_map(|week| {
-                (0..7).map(move |day| activity_level(week, day, 17, 31, 7, 13, [20, 40, 60, 80]))
-            })
-            .collect::<Vec<_>>();
-        assert_eq!(levels.len(), 364);
-        assert!(levels.iter().all(|level| *level <= 4));
     }
 
     #[test]

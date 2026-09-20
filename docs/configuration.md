@@ -19,9 +19,9 @@ TOML。
 
 ## 站点与导航
 
-`[site]` 控制标题、描述、语言、canonical URL、OpenGraph/Twitter 图片、robots、
-跳转到正文的标签、默认主题和主题存储键。社交图片应使用可公开访问的绝对 HTTPS
-URL。`base_path` 通常保留为空，GitHub Pages 的仓库路径由构建脚本参数注入。
+`[site]` 控制标题、描述、语言、canonical URL、OpenGraph/Twitter 图片、robots 和
+跳转到正文的标签。社交图片应使用可公开访问的绝对 HTTPS URL。`base_path` 通常
+保留为空，GitHub Pages 的仓库路径由构建脚本参数注入。
 
 ```toml
 [site]
@@ -33,14 +33,38 @@ social_image_url = "https://example.org/archive/social-card.jpg"
 social_image_alt = "Ada Lovelace Research Archive"
 social_card = "summary_large_image"
 robots = "index, follow"
+google_site_verification = "your-google-search-console-token"
 skip_to_content_label = "Skip to main content"
-default_theme = "system"
-theme_storage_key = "archive-color-mode"
 base_path = ""
 ```
 
-`[navbar]` 设置品牌、CV、主题按钮、移动菜单和导航链接。站内链接必须指向已有的栏目
-锚点，例如 `#news`；外部链接应使用完整 HTTPS URL。
+`google_site_verification` 是 Google Search Console 提供的验证令牌。构建后的根页面只
+生成一个 `<meta name="google-site-verification">`，令牌不会随中英文切换改变。
+
+`[navbar]` 设置品牌、CV、移动菜单和导航链接。站内链接必须指向已有的栏目
+锚点，例如 `#experience`；外部链接应使用完整 HTTPS URL。
+
+颜色模式只跟随操作系统的 `prefers-color-scheme`。站点不提供手动覆盖，也不会读取
+或写入 localStorage、sessionStorage、Cookie；系统主题在页面打开期间变化时会立即
+同步。
+
+## 自动语言匹配
+
+英文文案由 `config/site.toml` 提供，同时也是 SSG/SSR 和缺失翻译时的回退内容。
+简体中文翻译位于 `config/locales/zh-CN.json`，使用按功能命名的稳定翻译键。构建脚本
+会校验 JSON 语法，单元测试会校验所有必需翻译键均存在且非空。
+
+浏览器端按 `navigator.languages` 的优先顺序协商 `zh-CN` 或英文；不支持的语言回退
+英文。页面监听 `languagechange`，因此操作系统或浏览器语言在页面打开期间发生变化
+时，会同步更新正文、无障碍标签、动态 GitHub 文案、页面标题、分享元数据以及
+`html[lang]`。语言偏好不会写入 localStorage、sessionStorage 或 Cookie。
+
+新增当前可见文案时，应同时：
+
+1. 保留 `site.toml` 中的英文回退内容；
+2. 在 `zh-CN.json` 中新增对应翻译键；
+3. 将该键加入 `src/localization.rs` 的 `REQUIRED_ZH_CN_KEYS`；
+4. 为动态模板使用具名占位符，例如 `{total}`，不要拼接依赖语序的翻译片段。
 
 ## 内容栏目
 
@@ -48,8 +72,17 @@ base_path = ""
 - `[news]`：栏目标题、时间线条目和标签配色。
 - `[publications]`：统计数字、年度柱图、论文卡片、作者高亮和 PDF/代码操作。
 - `[teaching]`：课程卡片和资料链接。
-- `[activity]`：热图尺寸、标签、确定性种子、阈值和五级颜色。
+- `[activity]`：VibeUsage 徽章、GitHub 用户名、公开 contribution API、资料链接、
+  热图尺寸和五级颜色。`vibe_badge_url` 保持远程引用以展示近 7 日实时数据，
+  `vibe_profile_url` 是点击徽章后的目标页面。
 - `[footer]`：所有者、平台名、年份策略和文本模板。
+
+`[news]`、`[publications]`、`[teaching]` 和 `[activity]` 支持 `enabled`。设为
+`false` 时，该栏目不会出现在生成页面中；导航中也不应保留指向该栏目的链接。
+论文的 `stats`/`items` 与课程的 `items` 未配置时默认为空数组，因此无需添加占位内容。
+Activity 在 SSR 阶段输出空白加载网格，浏览器加载后通过 `api_url` 获取最近一年的
+实时 contribution 日期、次数与等级。该接口必须允许跨域请求，且不应在前端 URL
+或请求头中放置 GitHub access token。
 
 重复条目使用 TOML 数组表：
 
@@ -85,6 +118,9 @@ materials_url = "https://example.org/courses/math-101"
 `year_mode = "build"` 使用构建年份；`year_mode = "fixed"` 使用 `fixed_year`。
 `text_template` 必须且只能使用支持的占位符：`{year}`、`{owner}`、
 `{powered_by}`、`{hosted_by}`。
+
+`[[footer.technologies]]` 按顺序配置页脚技术名称及官方图标。`icon` 支持 `rust`、
+`vue`、`dioxus`；列表为空时回退显示 `powered_by` 纯文本。
 
 ## 验证命令
 

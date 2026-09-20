@@ -28,20 +28,66 @@ for (const required of expectedRoot) {
 
 const assets = relativeFiles.filter((file) => file.startsWith(`assets${sep}`))
 const extensions = assets.map((file) => file.slice(file.lastIndexOf('.'))).sort()
-if (assets.length !== 4 || extensions.join(',') !== '.css,.ico,.js,.wasm') {
+if (assets.length !== 8 || extensions.join(',') !== '.css,.jpg,.js,.png,.png,.svg,.svg,.wasm') {
   throw new Error(`unexpected asset inventory: ${assets.join(', ')}`)
 }
-if (relativeFiles.length !== 7) {
+if (relativeFiles.length !== 11) {
   throw new Error(`unexpected artifact inventory: ${relativeFiles.join(', ')}`)
+}
+for (const asset of assets) {
+  if (!/-dxh[0-9a-f]+\.[a-z0-9]+$/i.test(asset)) {
+    throw new Error(`asset is missing a content hash: ${asset}`)
+  }
 }
 if (files.some((file) => (statSync(file).mode & 0o111) !== 0)) {
   throw new Error('Pages artifact contains an executable file')
 }
 
+const budgets = new Map([
+  ['.wasm', 900_000],
+  ['.js', 70_000],
+  ['.css', 40_000],
+  ['.jpg', 60_000],
+])
+for (const asset of assets) {
+  const extension = asset.slice(asset.lastIndexOf('.'))
+  const budget = budgets.get(extension)
+  const size = statSync(join(root, asset)).size
+  if (budget && size > budget) {
+    throw new Error(`${asset} exceeds its ${budget}-byte budget: ${size}`)
+  }
+}
+
 const index = readFileSync(join(root, 'index.html'), 'utf8')
 const notFound = readFileSync(join(root, '404.html'), 'utf8')
-for (const token of ['Tony Stark', 'Latest News', 'Selected Research', 'GitHub Activity']) {
+if (Buffer.byteLength(index) > 40_000) {
+  throw new Error(`index.html exceeds its 40000-byte budget: ${Buffer.byteLength(index)}`)
+}
+for (const token of [
+  '<title>Xuning TAN</title>',
+  '<meta name="google-site-verification" content="j-zSpLhdAjkV6kQEJ9w032KVBetc5hpdwjg5XUz4zkU"/>',
+  'Xuning TAN',
+  'Experience &#38; Education',
+  'The Australian National University',
+  'https://github.com/A1pine',
+  'GitHub Contributions',
+  'Loading GitHub contribution data...',
+]) {
   if (!index.includes(token)) throw new Error(`index is missing SSR token: ${token}`)
+}
+const faviconTag = index.match(/<link\b[^>]*\brel="icon"[^>]*>/)?.[0] ?? ''
+if (
+  !faviconTag.includes('type="image/png"')
+  || !faviconTag.includes('sizes="256x256"')
+  || !/href="[^"]+favicon-[^"]+\.png"/.test(faviconTag)
+) {
+  throw new Error('index is missing the PNG favicon metadata')
+}
+for (const token of ['Tony Stark', 'id="publications"', 'id="teaching"']) {
+  if (index.includes(token)) throw new Error(`index contains disabled or stale content: ${token}`)
+}
+if (!/<link rel="preload" href="[^"]+\.wasm" as="fetch" type="application\/wasm" crossorigin>/.test(index)) {
+  throw new Error('index is missing the WASM preload')
 }
 if (!notFound.includes(`0; url=${prefix}`) || !notFound.includes('data-pages-404="true"')) {
   throw new Error(`404 does not redirect to ${prefix}`)

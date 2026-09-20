@@ -12,6 +12,7 @@ role = "Mathematician • Writer • Computing Pioneer"
 location = "London, United Kingdom"
 company = "Analytical Engine Archive"
 bio = "I document methods for symbolic computation and the future uses of analytical engines."
+bio_italic_phrases = []
 image_alt = "Portrait of Ada Lovelace"
 interests = ["Analytical Engines", "Algorithms", "Mathematical Logic", "Music", "Poetry"]
 

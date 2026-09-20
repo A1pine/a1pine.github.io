@@ -10,6 +10,7 @@ phases. The authoritative documents are:
 - [Framework decision](docs/architecture/adr-001-dioxus.md)
 - [Delivery and acceptance plan](docs/migration-plan.md)
 - [Configuration guide](docs/configuration.md)
+- [Performance architecture](docs/performance.md)
 - [Deployment guide](docs/deployment.md)
 - [Final completion audit](docs/acceptance/final-audit.md)
 

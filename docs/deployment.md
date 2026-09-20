@@ -75,7 +75,7 @@ node scripts/verify-pages-artifact.mjs dist/public arcademic-rust
 verifier 要求：
 
 - `.nojekyll`、`index.html`、`404.html` 存在；
-- 恰好一个当前 CSS、JS、WASM 和 favicon，共 7 个文件；
+- 恰好一个当前 CSS、JS、WASM、favicon、优化 JPEG 头像，以及三个页脚官方品牌图标，共 11 个文件；
 - 没有可执行文件或服务端二进制；
 - `index.html` 包含预渲染配置内容；
 - 所有本地引用存在并使用正确 base path；

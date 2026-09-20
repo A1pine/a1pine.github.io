@@ -75,7 +75,12 @@ async fn blinking_loop(mut cells: Signal<Vec<GridCell>>, config: &'static Backgr
         let Some(document) = window.document() else {
             continue;
         };
-        if document.hidden() {
+        let prefers_dark = window
+            .match_media("(prefers-color-scheme: dark)")
+            .ok()
+            .flatten()
+            .is_some_and(|query| query.matches());
+        if document.hidden() || prefers_dark {
             continue;
         }
 

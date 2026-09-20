@@ -25,11 +25,7 @@ async function createStablePage(
   viewport: VisualState['viewport'],
   theme: Theme,
 ) {
-  const context = await browser.newContext({ viewport, reducedMotion: 'reduce' })
-  await context.addInitScript((selectedTheme) => {
-    localStorage.setItem('nuxt-color-mode', selectedTheme)
-    localStorage.setItem('arcademic-color-mode', selectedTheme)
-  }, theme)
+  const context = await browser.newContext({ viewport, reducedMotion: 'reduce', colorScheme: theme })
   const page = await context.newPage()
   await page.route('https://images.unsplash.com/**', (route) => route.fulfill({
     body: transparentImage,

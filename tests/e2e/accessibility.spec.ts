@@ -16,10 +16,12 @@ test('has no axe violations in both themes and viewports', async ({ browser }, t
     ['mobile-light', { width: 390, height: 844 }, 'light'],
     ['mobile-dark', { width: 390, height: 844 }, 'dark'],
   ] as const) {
-    const context = await browser.newContext({ baseURL, viewport, reducedMotion: 'reduce' })
-    if (theme === 'dark') {
-      await context.addInitScript(() => localStorage.setItem('arcademic-color-mode', 'dark'))
-    }
+    const context = await browser.newContext({
+      baseURL,
+      viewport,
+      reducedMotion: 'reduce',
+      colorScheme: theme,
+    })
     const page = await context.newPage()
     const assertRuntime = watchRuntime(page)
     await openSite(page)

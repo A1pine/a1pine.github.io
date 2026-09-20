@@ -1,21 +1,22 @@
 use dioxus::prelude::*;
 use dioxus_free_icons::{Icon, icons::ld_icons::LdArrowUp};
 
-use crate::components::model::should_show_scroll_to_top;
 use crate::config::ScrollToTopConfig;
+use crate::localization::{translate, use_locale};
 
 #[component]
-pub fn ScrollToTop(config: &'static ScrollToTopConfig, scroll_y: Signal<f64>) -> Element {
-    let visible = should_show_scroll_to_top(scroll_y(), config.threshold_px);
-
+pub fn ScrollToTop(config: &'static ScrollToTopConfig, visible: Signal<bool>) -> Element {
+    let locale = use_locale();
+    let is_visible = visible();
+    let title = translate(locale, "scroll_to_top.title", &config.title);
     rsx! {
         button {
-            class: if visible { "glass-card scroll-to-top is-visible" } else { "glass-card scroll-to-top" },
+            class: if is_visible { "glass-card scroll-to-top is-visible" } else { "glass-card scroll-to-top" },
             r#type: "button",
-            title: config.title.clone(),
-            aria_label: config.title.clone(),
-            aria_hidden: (!visible).to_string(),
-            tabindex: if visible { "0" } else { "-1" },
+            title: title.clone(),
+            aria_label: title,
+            aria_hidden: (!is_visible).to_string(),
+            tabindex: if is_visible { "0" } else { "-1" },
             onclick: move |_| scroll_window_to_top(config.behavior),
             Icon { icon: LdArrowUp, width: 20, height: 20 }
         }

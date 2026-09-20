@@ -17,7 +17,7 @@
 | 生成静态网页 | root/repository release 均为预渲染 `index.html` + 静态资产，无服务端二进制 | 完成 |
 | GitHub Pages | workflow、`.nojekyll`、base path、custom 404、Pages 等价预览、deployment guide | 完成 |
 | 详细阶段计划与验收 | `migration-plan.md` 和 Phase 1–7 acceptance records | 完成 |
-| 单元测试设计 | 35 个 Rust 单测覆盖配置、模型、finalizer；替换配置 integration；Playwright E2E/axe/visual | 完成 |
+| 单元测试设计 | Rust 单测覆盖配置、模型、finalizer；替换配置 integration；Playwright E2E/axe/visual | 完成 |
 | 每阶段 Git commit | Phase 0–7 均使用独立 `phase N:` commit；Phase 7 commit 记录见最终仓库日志 | 完成 |
 
 ## 模块矩阵
@@ -25,13 +25,13 @@
 | 模块 | 内容/状态/运动证据 | 验收证据 | 结论 |
 |---|---|---|---|
 | Background | pointer RAF、coarse resize、visibility pause、blinking grid、主题背景 | 三浏览器 pointer/blink，桌面明暗视觉 | 完成 |
-| Navbar | 六链接、About anchor、主题持久化、移动菜单、CV、阅读进度 | 键盘/重载/Escape/hover/scroll E2E，menu/CV 视觉 | 完成 |
+| Navbar | 配置链接、About anchor、系统主题跟随、移动菜单、CV、阅读进度 | 系统明暗动态切换、无 Storage/Cookie、键盘/Escape/scroll E2E | 完成 |
 | Hero | 图片与占位、状态时区、联系信息、简介、兴趣、social | work-hour 单测、媒体几何、SSR、desktop/mobile 视觉 | 完成 |
 | News | 三条时间线、标签映射、fallback、stagger、hover | tag 单测、内容/hover E2E、landmark/像素比较 | 完成 |
 | Research | totals、五年归一化 bars、入场、tooltip | normalization 单测、tooltip E2E/视觉、响应式局部滚动 | 完成 |
 | Publications | 三卡片、图片、作者高亮、标签、可配置 actions、hover | action/link 单测、blocked-image 几何、hover 视觉 | 完成 |
 | Teaching | 四课程、1/2/4 列、固定标题、stagger/hover | 配置顺序、三浏览器 hover、desktop/mobile landmark | 完成 |
-| Activity | 52×7 deterministic grid、标签、legend、入场、canvas hover、主题、键盘滚动 | golden/范围/364 单测与 E2E、tooltip 0% pixel diff、no-JS DOM | 完成 |
+| Activity | 53×7 实时 GitHub contribution 网格、加载/失败状态、日期次数 tooltip、主题、键盘滚动 | CORS/API 实测、371 格 E2E、线上数据 smoke test、no-JS loading DOM | 完成 |
 | Footer | 模板、build/fixed year、主题 | 模板单测、SSR/视觉 | 完成 |
 | ScrollToTop | strict threshold、smooth/reduced motion、hover | 300/301 单测与 E2E、视觉状态 | 完成 |
 
@@ -43,25 +43,28 @@
   动画持续时间和 footer placeholders。
 - finalizer 结构化设置 `lang`/主题变量、规范化根资源 URL、验证所有配置值和 base
   path，并生成 404。
-- artifact verifier 要求精确 7 文件清单、存在的 base-path 资源、SSR token、404
+- artifact verifier 要求精确 11 文件清单、存在的 base-path 资源、SSR token、404
   目标、无可执行文件。
 
 ## 自动化证据
 
-- Rust：35 unit + 1 integration，format、Clippy、WASM check。
+- Rust：unit + 1 integration，format、Clippy、WASM check。
 - Browser：Chromium/Firefox/WebKit 对 root 与 repository artifact 各 13 passed、2
   expected skips；console/page error/首方失败请求为 0。
 - Accessibility：Chromium 桌面/移动、浅/深 axe 0 violations。
 - Lighthouse：两套路径 Accessibility 100、SEO 100、Best Practices 100。
 - Visual：十状态全部 ≤0.5%，六个 landmark 全部 ≤2 CSS px；测试无任意 sleep。
-- Reproducibility：连续两次清理式 repository release 的 7 文件 SHA-256 全部一致。
-- Clean clone：从 Phase 7 commit 的新 `git clone --no-local` 在无 target/dist/node_modules
-  状态下通过 npm、Rust、WASM、release、artifact verifier 和三浏览器 CI 等价命令。
+- Reproducibility：连续两次清理式 repository release 的 11 文件 SHA-256 全部一致。
+- Performance：完整保留全部动画；HTML 21.7 KB、WASM 832 KB（gzip 323 KB、
+  Brotli 252 KB）、LCP JPEG 30.7 KB，并由 artifact budgets 防回归。
+- Clean clone：Phase 7 基线 commit 的新 `git clone --no-local` 在无
+  target/dist/node_modules 状态下通过 npm、Rust、WASM、release、artifact verifier
+  和三浏览器 CI 等价命令；当前品牌与头像资产另以连续两次 11 文件 release hash 验证。
 
 ## 残余边界
 
-远程 Unsplash 可用性属于外部网络状态；页面已通过固定宽高、背景占位、responsive
-srcset 和 blocked-image E2E 保证其失败不会移动布局。视觉门槛按计划屏蔽远程图片与
-随机 blinking cell。该边界不构成缺失功能或间接证据。
+头像已作为本地指纹化资产打包，并通过固定宽高保证稳定布局。GitHub contribution
+数据和社交分享图仍依赖外部网络；Activity 提供固定尺寸的加载与失败状态，不会回退
+显示虚构数据。视觉门槛按计划屏蔽动态 blinking cell。
 
 审计未发现未实现模块、未配置资料、未验证交互或部署缺口。

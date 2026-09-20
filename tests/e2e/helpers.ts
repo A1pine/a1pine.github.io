@@ -28,8 +28,8 @@ export function watchRuntime(page: Page) {
 
 export async function openSite(page: Page) {
   await page.goto(siteUrl, { waitUntil: 'networkidle' })
-  await expect(page).toHaveTitle('Tony Stark Academic Profile')
-  await expect(page.getByRole('heading', { level: 1, name: 'Tony Stark' })).toBeVisible()
+  await expect(page).toHaveTitle('Xuning TAN')
+  await expect(page.getByRole('heading', { level: 1, name: 'Xuning TAN' })).toBeVisible()
 }
 
 export async function activateSection(page: Page, heading: string) {
