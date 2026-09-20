@@ -1,26 +1,24 @@
 [site]
-title = "Tony Stark Academic Profile"
-description = "Academic profile, research output, teaching, and activity for Tony Stark."
+title = "Xuning TAN"
+description = "Academic profile of Xuning TAN, a PhD student researching AI for science and engineering, energy systems, multi-agent systems, explainable AI, and quantum agents."
 language = "en"
-canonical_url = "https://example.com/"
-favicon_url = "/assets/favicon.ico"
-social_image_url = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1200&auto=format&fit=crop"
-social_image_alt = "Tony Stark academic profile"
+canonical_url = "https://a1pine.github.io/"
+favicon_url = "/assets/favicon.png"
+social_image_url = "https://github.com/A1pine.png?size=1200"
+social_image_alt = "Xuning TAN"
 social_card = "summary_large_image"
 robots = "index, follow"
+google_site_verification = "j-zSpLhdAjkV6kQEJ9w032KVBetc5hpdwjg5XUz4zkU"
 skip_to_content_label = "Skip to main content"
-default_theme = "system"
-theme_storage_key = "arcademic-color-mode"
 base_path = ""
 
 [navbar]
 primary_navigation_label = "Primary navigation"
-brand = "Tony Stark"
+brand = "Xuning TAN"
 brand_url = "#home"
 cv_label = "CV"
 cv_url = "#"
-show_cv = true
-theme_toggle_label = "Toggle Theme"
+show_cv = false
 mobile_menu_open_label = "Open navigation"
 mobile_menu_close_label = "Close navigation"
 
@@ -33,16 +31,8 @@ name = "About"
 href = "#about"
 
 [[navbar.links]]
-name = "News"
-href = "#news"
-
-[[navbar.links]]
-name = "Research"
-href = "#publications"
-
-[[navbar.links]]
-name = "Teaching"
-href = "#teaching"
+name = "Experience"
+href = "#experience"
 
 [[navbar.links]]
 name = "Activity"
@@ -51,14 +41,15 @@ href = "#activity"
 [hero]
 anchor = "home"
 about_anchor = "about"
-first_name = "Tony"
-last_name = "Stark"
-role = "Futurist • Engineer • Academic"
-location = "New York, NY"
-company = "Stark Industries"
-bio = "I am the CEO of Stark Industries and the primary benefactor of the Avengers Initiative. My research focuses on solving the world's existential threats through advanced technology, establishing new paradigms in clean energy (Arc Reactor), artificial intelligence (JARVIS), and nanotechnology."
-image_url = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=800&auto=format&fit=crop"
-image_alt = "Tony Stark"
+first_name = "Xuning"
+last_name = "TAN"
+role = "PhD Student • AI for Science and Engineering"
+location = "Shenzhen, China"
+company = "CUHK-Shenzhen & SLAI"
+bio = "Xuning Tan earned his Bachelor of Advanced Computing (Honours) from the Australian National University in 2022. He is currently a PhD student in the joint program between The Chinese University of Hong Kong, Shenzhen (CUHK-Shenzhen) and the Shenzhen Loop Area Institute (SLAI). Before beginning his doctoral studies, he spent three years at NetEase Games in Guangzhou. His research applies artificial intelligence to scientific and engineering problems, with a particular focus on energy systems. His core interests include multi-agent systems, trustworthy and explainable AI, and quantum agents."
+bio_italic_phrases = ["The Chinese University of Hong Kong, Shenzhen (CUHK-Shenzhen)", "Shenzhen Loop Area Institute (SLAI)", "NetEase Games"]
+image_url = "/assets/profile-photo.jpg"
+image_alt = "Xuning TAN"
 interests_title = "Research Interests"
 timezone_offset_hours = 8
 working_hours_start = 9
@@ -67,210 +58,121 @@ available_title = "Available for collaboration"
 offline_title = "Currently offline"
 
 [[hero.interests]]
-name = "Clean Energy"
+name = "AI for Science and Engineering"
 
 [[hero.interests]]
-name = "Artificial Intelligence"
+name = "Energy Systems"
 
 [[hero.interests]]
-name = "Nanotechnology"
+name = "Multi-Agent Systems"
 
 [[hero.interests]]
-name = "Robotics"
+name = "Trustworthy and Explainable AI"
 
 [[hero.interests]]
-name = "High Energy Physics"
-
-[[hero.social_links]]
-platform = "Email"
-icon = "mail"
-url = "mailto:tony@stark.com"
-username = "tony@stark.com"
-
-[[hero.social_links]]
-platform = "Twitter"
-icon = "twitter"
-url = "https://twitter.com/TonyStark"
-username = "@TonyStark"
+name = "Quantum Agents"
 
 [[hero.social_links]]
 platform = "GitHub"
 icon = "github"
-url = "https://github.com/TonyStark"
-username = "TonyStark"
+url = "https://github.com/A1pine"
+username = "A1pine"
+
+[[hero.social_links]]
+platform = "Twitter"
+icon = "twitter"
+url = "https://x.com/XuningTan"
+username = "@XuningTan"
 
 [news]
-anchor = "news"
-heading = "Latest News"
+enabled = true
+anchor = "experience"
+heading = "Experience & Education"
 
 [[news.items]]
 id = "1"
-date = "Dec 2024"
-title = "Arc Reactor Technology"
-description = "Successfully deployed clean energy solutions to power 50% of New York City using Arc Reactor technology."
-tag = "Product"
+date = "2018–2022"
+title = "The Australian National University"
+description = "Bachelor of Advanced Computing (Honours)."
+tag = "Education"
 
 [[news.items]]
 id = "2"
-date = "Nov 2024"
-title = "AI Breakthrough"
-description = "Released JARVIS 2.0, the world's most advanced AI assistant. Published in Nature and Science."
-tag = "Research"
+date = "2022–2025"
+title = "NetEase Games, Guangzhou"
+description = "Worked in the Interactive Entertainment Business Group."
+tag = "Industry"
 
 [[news.items]]
 id = "3"
-date = "Oct 2024"
-title = "Stark Expo 2024"
-description = "Announcing the next generation of Iron Man suits with integrated nanotechnology."
-tag = "Keynote"
+date = "2025–2026"
+title = "The Chinese University of Hong Kong, Shenzhen"
+description = "MPhil in Computer and Information Engineering."
+tag = "Education"
+
+[[news.items]]
+id = "4"
+date = "2026–Present"
+title = "CUHK-Shenzhen & Shenzhen Loop Area Institute (SLAI)"
+description = "PhD student in Computer and Information Engineering, advised by Prof. Junhua Zhao and Prof. Jianwei Huang."
+tag = "Education"
 
 [[news.tag_styles]]
-name = "Product"
+name = "Education"
 light_background = "#dbeafe"
 light_text = "#1d4ed8"
 dark_background = "#1e3a8a66"
 dark_text = "#bfdbfe"
 
 [[news.tag_styles]]
-name = "Research"
+name = "Industry"
 light_background = "#f3e8ff"
 light_text = "#7e22ce"
 dark_background = "#581c8766"
 dark_text = "#e9d5ff"
 
-[[news.tag_styles]]
-name = "Keynote"
-light_background = "#fef3c7"
-light_text = "#b45309"
-dark_background = "#78350f66"
-dark_text = "#fde68a"
-
 [publications]
+enabled = false
 anchor = "publications"
 heading = "Selected Research"
-subtitle = "Pushing the boundaries of clean energy and artificial intelligence."
+subtitle = "Research in AI for science and engineering."
 total_label = "Total Publications"
-total_value = "142"
+total_value = "0"
 citations_label = "Citations"
-citations_value = "12.8k"
+citations_value = "0"
 output_heading = "Research Output"
 output_range = "Last 5 Years"
 papers_label = "Papers"
 pdf_label = "↓ PDF"
 code_label = "↗ Code"
-highlight_author = "T. Stark"
-
-[[publications.stats]]
-year = 2020
-count = 5
-
-[[publications.stats]]
-year = 2021
-count = 8
-
-[[publications.stats]]
-year = 2022
-count = 12
-
-[[publications.stats]]
-year = 2023
-count = 18
-
-[[publications.stats]]
-year = 2024
-count = 24
-
-[[publications.items]]
-id = "p1"
-title = "Particle acceleration in self-sustaining fusion reactions"
-venue = "Nature Physics"
-year = 2024
-authors = ["T. Stark", "B. Banner"]
-description = "Proposed a new method for stabilizing tokamak fields using miniaturized arc reactor technology. This paper demonstrates a 300% efficiency increase in plasma containment fields."
-tags = ["Fusion", "Energy", "Physics"]
-image_url = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop"
-image_alt = "Earth viewed from space"
-pdf_url = ""
-code_url = ""
-
-[[publications.items]]
-id = "p2"
-title = "Nanotech Integration in Human-Machine Interfaces"
-venue = "Science Robotics"
-year = 2023
-authors = ["T. Stark", "P. Parker"]
-description = "Developing a neural link mesh for seamless control of prosthetic limbs with millisecond latency. The study introduces the 'Bleeding Edge' architecture for reversible nanotech deployment."
-tags = ["Robotics", "AI", "Nanotech"]
-image_url = "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=75&w=600&auto=format&fit=crop"
-image_alt = "Artificial intelligence visualization"
-pdf_url = ""
-code_url = ""
-
-[[publications.items]]
-id = "p3"
-title = "Autonomous Decision Making in Swarm Intelligence"
-venue = "ICRA"
-year = 2023
-authors = ["T. Stark", "J. Rhodes"]
-description = "Algorithms for decentralized command structures in autonomous drone legions (Iron Legion protocol). Focuses on collision avoidance and distributed target acquisition without central processing."
-tags = ["AI", "Swarm", "Control"]
-image_url = "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=600&auto=format&fit=crop"
-image_alt = "Humanoid robot"
-pdf_url = ""
-code_url = ""
+highlight_author = "X. Tan"
 
 [teaching]
+enabled = false
 anchor = "teaching"
-heading = "Teaching at Stark Industries"
+heading = "Teaching"
 semester_prefix = "Last"
 
-[[teaching.items]]
-id = "1"
-code = "STARK101"
-title = "Introduction to Arc Reactor Technology"
-semester = "Fall 2024"
-description = "Fundamentals of palladium core degradation and new element synthesis."
-materials_url = ""
-
-[[teaching.items]]
-id = "2"
-code = "STARK201"
-title = "Advanced AI Systems"
-semester = "Fall 2024"
-description = "From JARVIS to FRIDAY: Designing conversational interfaces and predictive combat algorithms."
-materials_url = ""
-
-[[teaching.items]]
-id = "3"
-code = "STARK301"
-title = "Quantum Engineering"
-semester = "Spring 2024"
-description = "Navigating the quantum realm for time dilation and energy retrieval."
-materials_url = ""
-
-[[teaching.items]]
-id = "4"
-code = "STARK401"
-title = "Nanotechnology and Future Materials"
-semester = "Spring 2024"
-description = "Bleeding edge armor integration and housing units."
-materials_url = ""
-
 [activity]
+enabled = true
 anchor = "activity"
-heading = "GitHub Activity"
+heading = "GitHub Contributions"
+vibe_badge_url = "https://vibecafe.ai/@a1pine/badge"
+vibe_profile_url = "https://vibecafe.ai/@a1pine?ref=badge"
+vibe_badge_alt = "VibeUsage for the last 7 days"
+github_username = "A1pine"
+profile_url = "https://github.com/A1pine"
+api_url = "https://github-contributions-api.jogruber.de/v4/A1pine?y=last"
+profile_label = "View A1pine on GitHub"
+loading_label = "Loading GitHub contribution data..."
+error_label = "Contribution data is temporarily unavailable."
+total_label = "contributions in the last year"
 less_label = "Less"
 more_label = "More"
-level_title_prefix = "Activity Level"
-weeks = 52
+weeks = 53
 days = 7
-months = ["Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+months = ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"]
 day_labels = ["Mon", "Wed", "Fri"]
-seed_week_multiplier = 17
-seed_day_multiplier = 31
-seed_cross_multiplier = 7
-seed_offset = 13
-level_thresholds = [20, 40, 60, 80]
 
 [[activity.level_colors]]
 light = "#e2e8f080"
@@ -310,12 +212,24 @@ threshold_px = 300
 behavior = "smooth"
 
 [footer]
-owner = "Tony Stark"
-powered_by = "Arc Reactor Core"
-hosted_by = "Jarvis"
-year_mode = "build"
+owner = "Xuning TAN"
+powered_by = "Rust, Vue and Dioxus"
+hosted_by = "Love"
+year_mode = "fixed"
 fixed_year = 2026
-text_template = "© Copyright {year} {owner}. Powered by {powered_by}. Hosted by {hosted_by}."
+text_template = "© Copyright {year} {owner}. Powered by {powered_by}. Hosted with {hosted_by}."
+
+[[footer.technologies]]
+name = "Rust"
+icon = "rust"
+
+[[footer.technologies]]
+name = "Vue"
+icon = "vue"
+
+[[footer.technologies]]
+name = "Dioxus"
+icon = "dioxus"
 
 [animation]
 enabled = true
