@@ -1043,7 +1043,7 @@ mod tests {
     #[test]
     fn invalid_url_scheme_is_rejected() {
         let source = production_source().replace(
-            "canonical_url = \"https://a1pine.github.io/\"",
+            "canonical_url = \"https://blog.xuningtan.com/\"",
             "canonical_url = \"javascript:alert(1)\"",
         );
         let error = SiteConfig::from_toml(&source).expect_err("invalid URL must fail");

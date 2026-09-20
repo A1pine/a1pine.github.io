@@ -32,7 +32,8 @@ npm run test:e2e -- --project=chromium --project=firefox --project=webkit
 
 ## 构建路径
 
-仓库站点的 base path 是仓库名：
+仓库站点的 base path 是仓库名；用户/组织根站点（`*.github.io`）由 workflow 自动
+使用空 base path：
 
 ```bash
 scripts/build-pages.sh arcademic-rust release
@@ -84,6 +85,6 @@ verifier 要求：
 ## 自定义域名
 
 自定义域通常部署根路径构建。将域名写入 Pages 的 Custom domain 设置并按 GitHub
-给出的 DNS 记录配置。若需要仓库内 `CNAME` 文件，应在 `scripts/build-pages.sh` 的
-artifact 组装阶段显式生成，并同步更新 verifier 的文件清单；不要手工修改
+给出的 DNS 记录配置。构建脚本在设置 `PAGES_CNAME` 环境变量后会在 artifact 中生成
+对应的 `CNAME` 文件；workflow 已为 `blog.xuningtan.com` 启用该行为。不要手工修改
 `dist/public`，因为该目录每次构建都会重建。

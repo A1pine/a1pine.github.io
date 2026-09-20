@@ -3,7 +3,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { basename, join, relative, resolve, sep } from 'node:path'
 
-const [directoryArgument, basePathArgument = ''] = process.argv.slice(2)
+const [directoryArgument, basePathArgument = '', cnameArgument] = process.argv.slice(2)
 if (!directoryArgument) {
   throw new Error('usage: verify-pages-artifact.mjs <directory> [base-path]')
 }
@@ -22,6 +22,7 @@ function filesBelow(directory) {
 const files = filesBelow(root)
 const relativeFiles = files.map((file) => relative(root, file)).sort()
 const expectedRoot = ['.nojekyll', '404.html', 'index.html']
+if (cnameArgument) expectedRoot.push('CNAME')
 for (const required of expectedRoot) {
   if (!relativeFiles.includes(required)) throw new Error(`missing ${required}`)
 }
@@ -31,8 +32,12 @@ const extensions = assets.map((file) => file.slice(file.lastIndexOf('.'))).sort(
 if (assets.length !== 8 || extensions.join(',') !== '.css,.jpg,.js,.png,.png,.svg,.svg,.wasm') {
   throw new Error(`unexpected asset inventory: ${assets.join(', ')}`)
 }
-if (relativeFiles.length !== 11) {
+const expectedFileCount = cnameArgument ? 12 : 11
+if (relativeFiles.length !== expectedFileCount) {
   throw new Error(`unexpected artifact inventory: ${relativeFiles.join(', ')}`)
+}
+if (cnameArgument && readFileSync(join(root, 'CNAME'), 'utf8').trim() !== cnameArgument) {
+  throw new Error('CNAME does not match the configured custom domain')
 }
 for (const asset of assets) {
   if (!/-dxh[0-9a-f]+\.[a-z0-9]+$/i.test(asset)) {

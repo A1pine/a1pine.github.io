@@ -54,18 +54,28 @@ jobs:
 
       - name: Build pre-rendered site
         env:
-          BASE_PATH: ${{ github.event.repository.name }}
+          PAGES_CNAME: blog.xuningtan.com
           DIOXUS_CLI: /home/runner/.cargo/bin/dx
-        run: scripts/build-pages.sh "$BASE_PATH" release
+        id: pages
+        run: |
+          if [[ "${{ github.event.repository.name }}" == *.github.io ]]; then
+            base_path=""
+          else
+            base_path="${{ github.event.repository.name }}"
+          fi
+          echo "base-path=${base_path}" >> "$GITHUB_OUTPUT"
+          scripts/build-pages.sh "$base_path" release
 
       - name: Prepare Pages artifact
-        run: node scripts/verify-pages-artifact.mjs dist/public "${{ github.event.repository.name }}"
+        run: >
+          node scripts/verify-pages-artifact.mjs dist/public
+          "${{ steps.pages.outputs.base-path }}" blog.xuningtan.com
 
       - name: Verify release artifact in browsers
         env:
-          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3200/${{ github.event.repository.name }}/
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3200/${{ steps.pages.outputs.base-path }}/
         run: |
-          node scripts/serve-pages.mjs dist/public 3200 "${{ github.event.repository.name }}" &
+          node scripts/serve-pages.mjs dist/public 3200 "${{ steps.pages.outputs.base-path }}" &
           curl --fail --retry 20 --retry-delay 1 --retry-connrefused "$PLAYWRIGHT_BASE_URL"
           npm run test:e2e -- --project=chromium --project=firefox --project=webkit
 

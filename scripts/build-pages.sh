@@ -56,5 +56,8 @@ cp -R "${source_dir}/." "${output_dir}/"
 cargo run --locked --quiet --bin finalize-pages -- \
   "${output_dir}/index.html" "${base_path}" "${output_dir}/404.html"
 touch "${output_dir}/.nojekyll"
+if [[ -n "${PAGES_CNAME:-}" ]]; then
+  printf '%s\n' "${PAGES_CNAME}" > "${output_dir}/CNAME"
+fi
 
 echo "Pages artifact: ${output_dir}"

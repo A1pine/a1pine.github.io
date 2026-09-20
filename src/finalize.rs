@@ -320,8 +320,9 @@ fn verify_configured_content(
     build_year: i32,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let decoded = html_escape::decode_html_entities(html);
+    let text = strip_markup(&decoded);
     for expected in configured_values(config, build_year) {
-        if !decoded.contains(&expected) {
+        if !decoded.contains(&expected) && !text.contains(&expected) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
                 format!("generated index is missing configured value: {expected}"),
@@ -344,6 +345,22 @@ fn verify_configured_content(
         }
     }
     Ok(())
+}
+
+fn strip_markup(html: &str) -> String {
+    let mut output = String::with_capacity(html.len());
+    let mut inside_tag = false;
+
+    for character in html.chars() {
+        match character {
+            '<' => inside_tag = true,
+            '>' => inside_tag = false,
+            _ if !inside_tag => output.push(character),
+            _ => {}
+        }
+    }
+
+    output
 }
 
 fn verify_biography_markup(html: &str, config: &SiteConfig) -> io::Result<()> {
