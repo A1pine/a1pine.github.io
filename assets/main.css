@@ -409,16 +409,10 @@ img, svg { display: block; }
 [data-theme="dark"] .bio-card p { color: #cbd5e1; }
 
 .bio-link {
-  color: #0369a1;
+  color: inherit;
   font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: rgb(3 105 161 / 0.35);
-  text-underline-offset: 3px;
-  transition: color 200ms, text-decoration-color 200ms;
+  text-decoration: none;
 }
-
-.bio-link:hover, .bio-link:focus-visible { text-decoration-color: currentColor; }
-[data-theme="dark"] .bio-link { color: #7dd3fc; }
 .interests-block { margin-bottom: 2rem; }
 
 .eyebrow { margin: 0 0 1rem; color: #475569; font-size: 0.75rem; font-weight: 700; line-height: 1rem; letter-spacing: 0.1em; text-transform: uppercase; }
