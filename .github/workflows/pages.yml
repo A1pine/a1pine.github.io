@@ -47,6 +47,7 @@ jobs:
 
       - name: Verify Rust code
         run: |
+          npm run test:publications
           cargo fmt --all -- --check
           cargo clippy --all-targets --all-features --locked -- -D warnings
           cargo test --all-features --locked

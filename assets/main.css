@@ -789,6 +789,15 @@ img, svg { display: block; }
 .publication-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .publication-tags span { padding: 0.25rem 0.625rem; border: 1px solid rgb(226 232 240 / 0.5); border-radius: 999px; background: rgb(255 255 255 / 0.5); color: #475569; font-size: 0.75rem; line-height: 1rem; }
 [data-theme="dark"] .publication-tags span { border-color: rgb(71 85 105 / 0.5); background: rgb(51 65 85 / 0.5); color: #cbd5e1; }
+.publication-tags .publication-type { font-weight: 700; }
+.publication-tags .publication-type-journal { border-color: rgb(14 116 144 / 0.22); background: rgb(207 250 254 / 0.72); color: #155e75; }
+.publication-tags .publication-type-conference { border-color: rgb(109 40 217 / 0.2); background: rgb(237 233 254 / 0.72); color: #6d28d9; }
+.publication-tags .publication-type-preprint { border-color: rgb(180 83 9 / 0.22); background: rgb(254 243 199 / 0.78); color: #92400e; }
+.publication-tags .publication-type-other { border-color: rgb(71 85 105 / 0.22); background: rgb(241 245 249 / 0.8); color: #475569; }
+[data-theme="dark"] .publication-tags .publication-type-journal { border-color: rgb(34 211 238 / 0.28); background: rgb(8 145 178 / 0.18); color: #a5f3fc; }
+[data-theme="dark"] .publication-tags .publication-type-conference { border-color: rgb(167 139 250 / 0.28); background: rgb(109 40 217 / 0.2); color: #ddd6fe; }
+[data-theme="dark"] .publication-tags .publication-type-preprint { border-color: rgb(251 191 36 / 0.28); background: rgb(180 83 9 / 0.2); color: #fde68a; }
+[data-theme="dark"] .publication-tags .publication-type-other { border-color: rgb(148 163 184 / 0.28); background: rgb(71 85 105 / 0.24); color: #cbd5e1; }
 
 .publication-citations {
   padding: 0.25rem 0.625rem;

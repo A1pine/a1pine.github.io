@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:publications": "node --test tests/publication-data.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:chromium": "playwright test --project=chromium",
     "test:visual": "playwright test --project=visual-chromium tests/e2e/visual.spec.ts"

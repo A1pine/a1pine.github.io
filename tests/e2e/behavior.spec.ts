@@ -73,7 +73,20 @@ test('renders the configured personal profile with stable media geometry', async
   await expect(page.getByRole('heading', { name: 'Selected Research' })).toBeVisible()
   await expect(page.locator('.publication-empty')).toHaveCount(0)
   await expect(page.locator('.publication-card')).toHaveCount(3)
+  await expect(page.locator('.publication-card[data-code-available="false"]')).toHaveCount(3)
+  await expect(page.locator('.publication-card').nth(0))
+    .toHaveAttribute('data-publication-type', 'journal')
+  await expect(page.locator('.publication-card').nth(1))
+    .toHaveAttribute('data-publication-type', 'preprint')
+  await expect(page.locator('.publication-card').nth(2))
+    .toHaveAttribute('data-publication-type', 'conference')
+  await expect(page.locator('.publication-type')).toHaveText([
+    'Journal',
+    'Preprint',
+    'Conference',
+  ])
   await expect(page.locator('.publication-action.secondary')).toHaveCount(3)
+  await expect(page.locator('.publication-action.primary')).toHaveCount(0)
   await expect(page.locator('.publication-action.secondary').first())
     .toHaveAttribute('href', /scholar\.google\.com\/citations/)
   await expect(page.locator('.publications-updated'))

@@ -208,8 +208,12 @@ pub struct PublicationStat {
 #[serde(deny_unknown_fields)]
 pub struct PublicationItem {
     pub id: String,
+    #[serde(default)]
+    pub source_id: String,
     pub title: String,
     pub venue: String,
+    #[serde(default)]
+    pub publication_type: PublicationType,
     pub year: u16,
     pub authors: Vec<String>,
     pub description: String,
@@ -219,7 +223,39 @@ pub struct PublicationItem {
     pub pdf_url: String,
     pub code_url: String,
     #[serde(default)]
+    pub code_available: bool,
+    #[serde(default)]
     pub citations: u32,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PublicationType {
+    Journal,
+    Conference,
+    Preprint,
+    #[default]
+    Other,
+}
+
+impl PublicationType {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Journal => "journal",
+            Self::Conference => "conference",
+            Self::Preprint => "preprint",
+            Self::Other => "other",
+        }
+    }
+
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Journal => "Journal",
+            Self::Conference => "Conference",
+            Self::Preprint => "Preprint",
+            Self::Other => "Other",
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -694,6 +730,11 @@ impl SiteConfig {
                 &item.code_url,
                 issues,
             );
+            if item.code_available == item.code_url.trim().is_empty() {
+                issues.push(format!(
+                    "publications.items[{index}].code_available must match code_url"
+                ));
+            }
         }
 
         for (index, item) in self.teaching.items.iter().enumerate() {
@@ -1010,6 +1051,27 @@ mod tests {
             error
                 .to_string()
                 .contains("hero.bio_italic_phrases[0] is not present in hero.bio")
+        );
+    }
+
+    #[test]
+    fn publication_code_availability_must_match_the_code_url() {
+        let mut config = site_config().clone();
+        let publication = config
+            .publications
+            .items
+            .first_mut()
+            .expect("generated publication fixture");
+        publication.code_available = true;
+        publication.code_url.clear();
+
+        let error = config
+            .validate()
+            .expect_err("inconsistent code state must fail");
+        assert!(
+            error
+                .to_string()
+                .contains("code_available must match code_url")
         );
     }
 

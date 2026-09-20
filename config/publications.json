@@ -15,8 +15,10 @@
   "items": [
     {
       "id": "llm-cecm-a-simulation-framework-for-strategic-generation-behavio-2",
+      "source_id": "gPmLhlAAAAAJ:d1gkVwhDpl0C",
       "title": "LLM-CECM: A simulation framework for strategic generation behavior in coupled electricity-carbon markets",
       "venue": "Renewable Energy, 126139",
+      "publication_type": "journal",
       "year": 2026,
       "authors": [
         "Y. Cheng",
@@ -34,12 +36,15 @@
       "image_alt": "",
       "pdf_url": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=gPmLhlAAAAAJ&citation_for_view=gPmLhlAAAAAJ:d1gkVwhDpl0C",
       "code_url": "",
+      "code_available": false,
       "citations": 0
     },
     {
       "id": "qart-a-quantum-classical-hybrid-architecture-for-long-horizon-re-1",
+      "source_id": "gPmLhlAAAAAJ:2osOgNQ5qMEC",
       "title": "QART: A Quantum-Classical Hybrid Architecture for Long-Horizon Reasoning--Exploring a Conditional Path toward Quantum Scaling",
       "venue": "arXiv preprint arXiv:2609.16887",
+      "publication_type": "preprint",
       "year": 2026,
       "authors": [
         "L. Lin",
@@ -59,12 +64,15 @@
       "image_alt": "",
       "pdf_url": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=gPmLhlAAAAAJ&citation_for_view=gPmLhlAAAAAJ:2osOgNQ5qMEC",
       "code_url": "",
+      "code_available": false,
       "citations": 0
     },
     {
       "id": "an-rl-snn-based-approach-for-reserve-forecasting-and-unit-commit-3",
+      "source_id": "gPmLhlAAAAAJ:9yKSN-GCB0IC",
       "title": "An Rl-Snn Based Approach for Reserve Forecasting and Unit Commitment Optimization",
       "venue": "2025 International Conference on Power System and Renewable Energy (PSRE), 1-6",
+      "publication_type": "conference",
       "year": 2025,
       "authors": [
         "S. Wang",
@@ -80,6 +88,7 @@
       "image_alt": "",
       "pdf_url": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=gPmLhlAAAAAJ&citation_for_view=gPmLhlAAAAAJ:9yKSN-GCB0IC",
       "code_url": "",
+      "code_available": false,
       "citations": 0
     }
   ]

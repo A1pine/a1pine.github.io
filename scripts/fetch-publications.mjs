@@ -4,10 +4,17 @@ import { chromium } from '@playwright/test'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
+import { applyPublicationOverrides, toPublication } from './publication-data.mjs'
+
 const scholarId = process.argv[2] ?? process.env.SCHOLAR_ID
 const serpApiKey = process.env.SERPAPI_KEY
 const outputPath = resolve(
   process.argv[3] ?? process.env.PUBLICATIONS_PATH ?? 'config/publications.json',
+)
+const overridesPath = resolve(
+  process.argv[4]
+    ?? process.env.PUBLICATION_OVERRIDES_PATH
+    ?? 'config/publication-overrides.json',
 )
 
 if (!scholarId) {
@@ -16,67 +23,16 @@ if (!scholarId) {
 
 const profileUrl = `https://scholar.google.com/citations?user=${encodeURIComponent(scholarId)}&hl=en&pagesize=100&sortby=pubdate&view_op=list_works`
 
-function parseInteger(value) {
-  const match = String(value ?? '').replace(/\u00a0/g, ' ').match(/\d[\d,]*/)
-  if (!match) return 0
-  return Number.parseInt(match[0].replace(/,/g, ''), 10)
-}
-
-function normalizeAuthor(author) {
-  const trimmed = String(author).trim().replace(/\s+/g, ' ')
-  return trimmed.replace(/^([A-Z])\s+([A-Z][\p{L}'-]*)$/u, '$1. $2')
-}
-
-function splitAuthors(value) {
-  return String(value ?? '')
-    .split(/,\s*|\s+and\s+/i)
-    .map(normalizeAuthor)
-    .filter((author) => author.length > 0 && author !== '...')
-}
-
-function slugify(title, index) {
-  const slug = String(title)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 64)
-    .replace(/-+$/g, '')
-  return `${slug || 'publication'}-${index + 1}`
-}
-
-function parseVenue(venueLine) {
-  const trimmed = String(venueLine ?? '').trim().replace(/\s+/g, ' ')
-  const yearMatch = trimmed.match(/(?:^|,\s*|\s)(\d{4})(?:\s*$|,)/)
-  if (!yearMatch) return { name: trimmed }
-  const name = trimmed.slice(0, yearMatch.index).replace(/[,\s]+$/, '')
-  return { name: name || trimmed }
-}
-
-function toPublication(article, index) {
-  const title = String(article.title ?? '').trim()
-  const authors = Array.isArray(article.authors)
-    ? article.authors.map((author) => normalizeAuthor(author.name)).filter(Boolean)
-    : splitAuthors(article.authors)
-  const venue = article.venue || parseVenue(article.publication ?? article.bib?.citation ?? '').name
-  const year = parseInteger(article.year ?? article.bib?.pub_year)
-  const citations = parseInteger(
-    article.cited_by?.value ?? article.num_citations ?? 0,
-  )
-  if (!title || !year) return null
-
-  return {
-    id: slugify(title, index),
-    title,
-    venue: venue || 'Google Scholar',
-    year,
-    authors,
-    description: '',
-    tags: [],
-    image_url: '',
-    image_alt: '',
-    pdf_url: article.link ?? '',
-    code_url: '',
-    citations,
+function loadOverrides(path) {
+  try {
+    const overrides = JSON.parse(readFileSync(path, 'utf8'))
+    if (!overrides || Array.isArray(overrides) || typeof overrides !== 'object') {
+      throw new Error('root must be an object keyed by source_id')
+    }
+    return overrides
+  } catch (error) {
+    if (error?.code === 'ENOENT') return {}
+    throw new Error(`invalid publication overrides at ${path}: ${error.message}`, { cause: error })
   }
 }
 
@@ -208,6 +164,7 @@ async function fetchWithBrowser() {
     }
 
     const publication = toPublication({
+      citation_id: href ? new URL(href, 'https://scholar.google.com/').searchParams.get('citation_for_view') : '',
       title,
       link: href ? new URL(href, 'https://scholar.google.com/').toString() : '',
       authors: authorsLine,
@@ -223,9 +180,13 @@ async function fetchWithBrowser() {
   return publications
 }
 
-const publications = serpApiKey
+const fetchedPublications = serpApiKey
   ? await fetchWithSerpApi(serpApiKey)
   : await fetchWithBrowser()
+const publications = applyPublicationOverrides(
+  fetchedPublications,
+  loadOverrides(overridesPath),
+)
 
 const sorted = publications.sort((left, right) => (
   right.year - left.year

@@ -34,6 +34,9 @@ jobs:
         if: ${{ env.SERPAPI_KEY == '' }}
         run: npx playwright install --with-deps chromium
 
+      - name: Verify publication data transforms
+        run: npm run test:publications
+
       - name: Fetch publications from Google Scholar
         run: node scripts/fetch-publications.mjs "$SCHOLAR_ID"
 

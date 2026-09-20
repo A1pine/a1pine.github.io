@@ -6,7 +6,7 @@ use crate::components::model::{
     unsplash_with_width,
 };
 use crate::components::reveal::use_reveal_observer;
-use crate::config::{AnimationConfig, PublicationsConfig};
+use crate::config::{AnimationConfig, PublicationType, PublicationsConfig};
 use crate::localization::{translate, translate_template, use_locale};
 
 #[component]
@@ -98,6 +98,9 @@ pub fn Research(
                         article {
                             class: "glass-card publication-card reveal reveal-card",
                             "data-reveal": "",
+                            "data-source-id": publication.source_id.clone(),
+                            "data-publication-type": publication.publication_type.as_str(),
+                            "data-code-available": publication.code_available.to_string(),
                             style: format!(
                                 "--reveal-delay: {}ms; --reveal-duration: {}ms",
                                 index * animation.item_stagger_ms as usize,
@@ -146,6 +149,7 @@ pub fn Research(
                                 }
                                 div { class: "publication-footer",
                                     div { class: "publication-tags",
+                                        PublicationTypeTag { publication_type: publication.publication_type }
                                         if !publication.tags.is_empty() {
                                             for tag in &publication.tags { span { "#{tag}" } }
                                         }
@@ -156,10 +160,12 @@ pub fn Research(
                                             url: publication.pdf_url.clone(),
                                             primary: false,
                                         }
-                                        PublicationAction {
-                                            label: config.code_label.clone(),
-                                            url: publication.code_url.clone(),
-                                            primary: true,
+                                        if publication.code_available {
+                                            PublicationAction {
+                                                label: config.code_label.clone(),
+                                                url: publication.code_url.clone(),
+                                                primary: true,
+                                            }
                                         }
                                         span {
                                             class: "publication-citations",
@@ -185,6 +191,23 @@ pub fn Research(
                     p { class: "publications-updated", {updated} }
                 }
             }
+        }
+    }
+}
+
+#[component]
+fn PublicationTypeTag(publication_type: PublicationType) -> Element {
+    let locale = use_locale();
+    let kind = publication_type.as_str();
+    let label = translate(
+        locale,
+        &format!("publications.type.{kind}"),
+        publication_type.label(),
+    );
+    rsx! {
+        span {
+            class: "publication-type publication-type-{kind}",
+            {label}
         }
     }
 }

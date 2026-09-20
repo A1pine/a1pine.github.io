@@ -205,8 +205,10 @@ pub fn configured_values(config: &SiteConfig, build_year: i32) -> Vec<String> {
         );
         values.extend(config.publications.items.iter().flat_map(|item| {
             let mut item_values = vec![
+                item.source_id.clone(),
                 item.title.clone(),
                 item.venue.clone(),
+                item.publication_type.as_str().to_owned(),
                 item.year.to_string(),
                 item.description.clone(),
                 item.image_alt.clone(),
@@ -214,6 +216,7 @@ pub fn configured_values(config: &SiteConfig, build_year: i32) -> Vec<String> {
             item_values.extend(item.authors.clone());
             item_values.extend(item.tags.clone());
             item_values.extend([item.pdf_url.clone(), item.code_url.clone()]);
+            item_values.push(item.code_available.to_string());
             item_values.push(item.citations.to_string());
             item_values
         }));
@@ -290,8 +293,20 @@ fn base_configured_values(config: &SiteConfig, build_year: i32) -> Vec<String> {
             config.publications.output_heading.clone(),
             config.publications.output_range.clone(),
         ]);
-        if !config.publications.items.is_empty() {
+        if config
+            .publications
+            .items
+            .iter()
+            .any(|publication| !publication.pdf_url.is_empty())
+        {
             values.push(config.publications.pdf_label.clone());
+        }
+        if config
+            .publications
+            .items
+            .iter()
+            .any(|publication| publication.code_available)
+        {
             values.push(config.publications.code_label.clone());
         }
         if !config.publications.stats.is_empty() {
