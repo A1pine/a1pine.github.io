@@ -1,7 +1,7 @@
 {
   "total_value": "3",
-  "citations_value": "0",
-  "last_updated": "2026-11-19",
+  "citations_value": "1",
+  "last_updated": "2026-11-20",
   "stats": [
     {
       "year": 2026,
@@ -14,7 +14,7 @@
   ],
   "items": [
     {
-      "id": "llm-cecm-a-simulation-framework-for-strategic-generation-behavio-2",
+      "id": "llm-cecm-a-simulation-framework-for-strategic-generation-behavio-1",
       "source_id": "gPmLhlAAAAAJ:d1gkVwhDpl0C",
       "title": "LLM-CECM: A simulation framework for strategic generation behavior in coupled electricity-carbon markets",
       "venue": "Renewable Energy, 126139",
@@ -37,10 +37,10 @@
       "pdf_url": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=gPmLhlAAAAAJ&citation_for_view=gPmLhlAAAAAJ:d1gkVwhDpl0C",
       "code_url": "",
       "code_available": false,
-      "citations": 0
+      "citations": 1
     },
     {
-      "id": "qart-a-quantum-classical-hybrid-architecture-for-long-horizon-re-1",
+      "id": "qart-a-quantum-classical-hybrid-architecture-for-long-horizon-re-2",
       "source_id": "gPmLhlAAAAAJ:2osOgNQ5qMEC",
       "title": "QART: A Quantum-Classical Hybrid Architecture for Long-Horizon Reasoning--Exploring a Conditional Path toward Quantum Scaling",
       "venue": "arXiv preprint arXiv:2609.16887",
